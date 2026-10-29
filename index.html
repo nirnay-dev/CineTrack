@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineTrack — Personal Watchlist & Series Tracker</title>
+    <!-- Tailwind CSS CDN for sleek, modern styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        display: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        surface: {
+                            900: '#0a0a0f',
+                            800: '#12131c',
+                            700: '#1c1e2d',
+                            600: '#272a3f'
+                        },
+                        accent: {
+                            DEFAULT: '#8b5cf6',
+                            hover: '#7c3aed',
+                            glow: 'rgba(139, 92, 246, 0.35)'
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #0a0a0f;
+            color: #f3f4f6;
+            overflow-x: hidden;
+        }
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0a0a0f;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #272a3f;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #8b5cf6;
+        }
+        .poster-card {
+            transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease;
+        }
+        .poster-card:hover {
+            transform: translateY(-6px) scale(1.015);
+            box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.7), 0 0 20px 0 rgba(139, 92, 246, 0.2);
+        }
+        .glass-panel {
+            background: rgba(18, 19, 28, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-accent selection:text-white">
+
+    <!-- Top Navigation & Action Bar -->
+    <header class="sticky top-0 z-30 glass-panel border-b border-white/10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-600/30">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h1 class="font-display text-xl font-bold tracking-tight text-white">CineTrack</h1>
+                        <span id="mode-badge" class="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                            Demo Mode
+                        </span>
+                    </div>
+                    <p class="text-xs text-gray-400">Minimalist Google Sheet + TMDB Watchlist</p>
+                </div>
+            </div>
+
+            <!-- Quick Stats Bar -->
+            <div class="hidden md:flex items-center gap-6 bg-surface-800/90 px-5 py-2 rounded-xl border border-white/5">
+                <div>
+                    <span class="text-xs text-gray-400 block">Watched</span>
+                    <span id="stat-total" class="font-display text-lg font-bold text-white">0</span>
+                </div>
+                <div class="h-6 w-px bg-white/10"></div>
+                <div>
+                    <span class="text-xs text-gray-400 block">Watch Time</span>
+                    <span id="stat-hours" class="font-display text-lg font-bold text-violet-400">0 hrs</span>
+                </div>
+                <div class="h-6 w-px bg-white/10"></div>
+                <div>
+                    <span class="text-xs text-gray-400 block">Total Rewatches</span>
+                    <span id="stat-rewatches" class="font-display text-lg font-bold text-emerald-400">0</span>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="flex items-center gap-2.5">
+                <button onclick="pickRandomWatched()" class="px-3.5 py-2 rounded-xl bg-surface-700 hover:bg-surface-600 text-gray-200 text-xs sm:text-sm font-medium flex items-center gap-2 border border-white/10 transition" title="Pick a random movie or series from your list">
+                    <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+                    </svg>
+                    <span>Surprise Me</span>
+                </button>
+
+                <button onclick="openAddModal()" class="px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-lg shadow-violet-600/25 transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+                    </svg>
+                    <span>Add Entry</span>
+                </button>
+
+                <button onclick="openSetupModal()" class="p-2 rounded-xl bg-surface-700 hover:bg-surface-600 text-gray-300 border border-white/10 transition" title="Configure Google Sheet & TMDB API">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Filter & Search Controls -->
+    <section class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6 pb-2">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+            <!-- Category Tabs -->
+            <div class="inline-flex p-1 rounded-xl bg-surface-800 border border-white/5 self-start">
+                <button onclick="setFilter('all')" id="tab-all" class="filter-tab px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white">
+                    All Watched
+                </button>
+                <button onclick="setFilter('movie')" id="tab-movie" class="filter-tab px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white">
+                    Movies
+                </button>
+                <button onclick="setFilter('series')" id="tab-series" class="filter-tab px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white">
+                    Series
+                </button>
+            </div>
+
+            <!-- Search Input -->
+            <div class="relative flex-1 max-w-md">
+                <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                </svg>
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    oninput="handleSearch(this.value)"
+                    placeholder="Filter by title or actor..." 
+                    class="w-full pl-10 pr-4 py-2 rounded-xl bg-surface-800 border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
+                >
+            </div>
+        </div>
+    </section>
+
+    <!-- Main Minimalist Poster Grid (Poster + Title only on card front, Cast on Click) -->
+    <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1">
+        <!-- Status / Toast Banner -->
+        <div id="status-banner" class="hidden mb-6 p-4 rounded-xl bg-surface-800 border border-violet-500/30 text-sm text-gray-200 flex items-center justify-between">
+            <span id="status-message"></span>
+            <button onclick="hideStatus()" class="text-gray-400 hover:text-white">&times;</button>
+        </div>
+
+        <!-- Grid Container -->
+        <div id="watchlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 sm:gap-6">
+            <!-- Dynamically populated by JavaScript -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="empty-state" class="hidden py-20 text-center">
+            <p class="text-gray-400 text-base">No matching movies or series found in your list.</p>
+        </div>
+    </main>
+
+    <!-- Cast & Details Modal (Opens when clicking any minimalist movie card) -->
+    <div id="details-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full max-w-3xl rounded-2xl overflow-hidden shadow-2xl border border-white/15 animate-fadeIn">
+            <div class="relative flex flex-col sm:flex-row">
+                <!-- Poster Column -->
+                <div class="sm:w-2/5 bg-surface-900">
+                    <img id="modal-poster" src="" alt="" class="w-full h-72 sm:h-full object-cover">
+                </div>
+                <!-- Info & Cast Column -->
+                <div class="sm:w-3/5 p-6 flex flex-col justify-between overflow-hidden">
+                    <div>
+                        <div class="flex items-start justify-between gap-2">
+                            <span id="modal-type" class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                                MOVIE
+                            </span>
+                            <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white p-1 rounded-lg">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                </svg>
+                            </button>
+                        </div>
+
+                        <h2 id="modal-title" class="font-display text-2xl font-bold text-white mt-2"></h2>
+                        <p id="modal-meta" class="text-xs text-gray-400 mt-1"></p>
+
+                        <p id="modal-overview" class="text-xs sm:text-sm text-gray-300 mt-4 leading-relaxed line-clamp-3"></p>
+
+                        <!-- IMDb / Netflix Style Top Billed Cast Carousel -->
+                        <div class="mt-6">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1 h-4 rounded-full bg-amber-400"></span>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-white">Top Billed Cast</h3>
+                                </div>
+                                <span class="text-[11px] text-gray-400">Click actor to filter</span>
+                            </div>
+                            <div id="modal-cast" class="flex gap-3.5 overflow-x-auto pb-3 pt-1 snap-x">
+                                <!-- Populated dynamically with circular actor avatars -->
+                            </div>
+                        </div>
+
+                        <!-- Recommended / Similar Titles Section -->
+                        <div class="mt-6 pt-4 border-t border-white/10">
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <span class="w-1 h-4 rounded-full bg-violet-400"></span>
+                                    <h3 class="text-xs font-bold uppercase tracking-wider text-white">You Might Also Like</h3>
+                                </div>
+                                <span class="text-[11px] text-gray-400">Similar & Recommendations</span>
+                            </div>
+                            <div id="modal-recommendations" class="flex gap-3 overflow-x-auto pb-2 snap-x">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Rewatch Counter & Footer Actions -->
+                    <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <span class="text-xs text-gray-400">Rewatch Count:</span>
+                            <div class="inline-flex items-center gap-2 bg-surface-900 px-2.5 py-1 rounded-lg border border-white/10">
+                                <button onclick="updateRewatch(-1)" class="text-gray-400 hover:text-white font-bold px-1">-</button>
+                                <span id="modal-rewatch" class="text-sm font-bold text-emerald-400">1</span>
+                                <button onclick="updateRewatch(1)" class="text-gray-400 hover:text-white font-bold px-1">+</button>
+                            </div>
+                        </div>
+                        <span id="modal-tmdb-id" class="text-[11px] text-gray-500 font-mono"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Movie / Series Modal -->
+    <div id="add-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full max-w-lg rounded-2xl p-6 border border-white/15 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-display text-lg font-bold text-white">Search & Add to Watchlist</h3>
+                    <p class="text-xs text-gray-400">Search TMDB directly or enter details manually</p>
+                </div>
+                <button onclick="closeAddModal()" class="text-gray-400 hover:text-white text-xl leading-none">&times;</button>
+            </div>
+
+            <!-- Live TMDB Search Box -->
+            <div class="mb-4">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-violet-400 mb-1.5">1. Search Movie or Series</label>
+                <div class="flex gap-2">
+                    <div class="relative flex-1">
+                        <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                        <input 
+                            type="text" 
+                            id="tmdb-search-query" 
+                            oninput="debouncedTmdbSearch(this.value)"
+                            placeholder="Type a title (e.g. Oppenheimer, Arcane, Stranger Things)..." 
+                            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-900 border border-white/15 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
+                        >
+                    </div>
+                </div>
+                <!-- Search Results Dropdown List -->
+                <div id="tmdb-search-results" class="mt-2 max-h-56 overflow-y-auto space-y-1.5 hidden pr-1">
+                    <!-- Dynamically populated search results -->
+                </div>
+            </div>
+
+            <hr class="border-white/10 my-2">
+
+            <!-- Selected / Manual Entry Form -->
+            <form onsubmit="handleAddEntry(event)" class="space-y-4 pt-2">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-emerald-400">2. Confirm Selected Details</label>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Title</label>
+                    <input type="text" id="input-title" required placeholder="Selected title will appear here..." class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">TMDB ID</label>
+                        <input type="number" id="input-tmdb-id" required placeholder="Auto-filled ID" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white font-mono focus:outline-none focus:border-accent">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Type</label>
+                        <select id="input-type" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
+                            <option value="movie">Movie</option>
+                            <option value="series">Series (TV)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-xl bg-surface-700 text-xs font-medium text-gray-300">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white shadow-lg shadow-violet-600/25">Add to Sheet & Watchlist</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Setup & Google Apps Script Guide Modal -->
+    <div id="setup-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 border border-white/15 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-display text-lg font-bold text-white">Backend & API Configuration</h3>
+                    <p class="text-xs text-gray-400">Connect your free TMDB API Key and Google Sheet Web App URL</p>
+                </div>
+                <button onclick="closeSetupModal()" class="text-gray-400 hover:text-white text-xl">&times;</button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">TMDB API Key (v3 auth)</label>
+                    <input type="text" id="config-tmdb-key" placeholder="Paste your free TMDB API key here..." class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white font-mono">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Google Apps Script Web App URL</label>
+                    <input type="url" id="config-sheet-url" placeholder="https://script.google.com/macros/s/.../exec" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white font-mono">
+                </div>
+
+                <div class="flex items-center justify-between pt-2">
+                    <button onclick="resetToDemo()" class="text-xs text-amber-400 hover:underline">Reset to Demo Mode</button>
+                    <button onclick="saveConfiguration()" class="px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white">Save & Sync</button>
+                </div>
+
+                <hr class="border-white/10 my-4">
+
+                <!-- Step-by-Step Google Sheet + Apps Script Code -->
+                <div>
+                    <h4 class="text-xs font-bold uppercase tracking-wider text-violet-400 mb-2">Step-by-Step Google Sheet Setup</h4>
+                    <ol class="text-xs text-gray-300 space-y-1.5 list-decimal list-inside mb-3">
+                        <li>Create a new Google Sheet and name Row 1 headers: <code class="text-emerald-300">title</code>, <code class="text-emerald-300">tmdb_id</code>, <code class="text-emerald-300">type</code>, <code class="text-emerald-300">rewatches</code></li>
+                        <li>Click <strong>Extensions &rarr; Apps Script</strong> and paste the script below:</li>
+                        <li>Click <strong>Deploy &rarr; New deployment &rarr; Web app</strong> (Execute as: <em>Me</em>, Who has access: <em>Anyone</em>).</li>
+                    </ol>
+                    <pre class="p-3 rounded-xl bg-surface-900 border border-white/10 text-[11px] text-gray-300 font-mono overflow-x-auto select-all">function doGet() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const rows = sheet.getDataRange().getValues();
+  const headers = rows.shift();
+  const data = rows.map(r => ({
+    title: r[0],
+    tmdb_id: r[1],
+    type: r[2] || 'movie',
+    rewatches: Number(r[3] || 1)
+  }));
+  return ContentService.createTextOutput(JSON.stringify({ status: 'success', data }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const body = JSON.parse(e.postData.contents);
+  sheet.appendRow([body.title, body.tmdb_id, body.type, body.rewatches || 1]);
+  return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Required TMDB Attribution Footer -->
+    <footer class="border-t border-white/5 py-6 mt-12 text-center text-xs text-gray-500">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>Built for Edge Cloud (Deno Deploy / Static HTML) &bull; Vanilla JS + Google Sheets</p>
+            <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
+        </div>
+    </footer>
+
+    <script>
+        // ============================================================================
+        // 1. DEMO FALLBACK DATASET (Works out-of-the-box before connecting API keys)
+        // ============================================================================
+        const DEMO_WATCHLIST = [
+            {
+                title: "Inception",
+                tmdb_id: 27205,
+                type: "movie",
+                rewatches: 3,
+                year: "2010",
+                runtime: 148,
+                poster: "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
+                overview: "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: inception.",
+                cast: [
+                    { name: "Leonardo DiCaprio", role: "Dom Cobb", photo: "https://image.tmdb.org/t/p/w185/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg" },
+                    { name: "Joseph Gordon-Levitt", role: "Arthur", photo: "https://image.tmdb.org/t/p/w185/z2FA8js799xqtfiFjBTicFYdfk.jpg" },
+                    { name: "Cillian Murphy", role: "Robert Fischer", photo: "https://image.tmdb.org/t/p/w185/dm6V24JJJVKB7qNv4T2Yq7N9J8N.jpg" },
+                    { name: "Tom Hardy", role: "Eames", photo: "https://image.tmdb.org/t/p/w185/d81K0RH8UX7tZj49tZaQhZ9ewH.jpg" },
+                    { name: "Elliot Page", role: "Ariadne", photo: "https://image.tmdb.org/t/p/w185/eCeFgzS8dYHnMfWQT0oQitCrsSz.jpg" }
+                ]
+            },
+            {
+                title: "Interstellar",
+                tmdb_id: 157336,
+                type: "movie",
+                rewatches: 4,
+                year: "2014",
+                runtime: 169,
+                poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+                overview: "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.",
+                cast: [
+                    { name: "Matthew McConaughey", role: "Cooper", photo: "https://image.tmdb.org/t/p/w185/e9ZHRY5toiBZCIPEEyvOG9A8ers.jpg" },
+                    { name: "Anne Hathaway", role: "Brand", photo: "https://image.tmdb.org/t/p/w185/s6tflSD20MGz04ZR2R1lZvhmC4Y.jpg" },
+                    { name: "Jessica Chastain", role: "Murph", photo: "https://image.tmdb.org/t/p/w185/bXFXy557Q5bf13F2B3W6d8S4T26.jpg" },
+                    { name: "Michael Caine", role: "Professor Brand", photo: "https://image.tmdb.org/t/p/w185/hZruclwEPCKw3e83rnFSIH5sRFZ.jpg" },
+                    { name: "Matt Damon", role: "Mann", photo: "https://image.tmdb.org/t/p/w185/At3JgvaNeEN4Z4ESKlhhes85Xo3.jpg" }
+                ]
+            },
+            {
+                title: "Breaking Bad",
+                tmdb_id: 1396,
+                type: "series",
+                rewatches: 2,
+                year: "2008",
+                runtime: 450,
+                poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+                overview: "Walter White, a New Mexico chemistry teacher, is diagnosed with Stage III cancer and given a prognosis of only two years left to live. He becomes filled with a sense of fearlessness and an unrelenting desire to secure his family's financial future at any cost.",
+                cast: [
+                    { name: "Bryan Cranston", role: "Walter White", photo: "https://image.tmdb.org/t/p/w185/7Jahy5LZX2Fo8fGJltMreAI49hC.jpg" },
+                    { name: "Aaron Paul", role: "Jesse Pinkman", photo: "https://image.tmdb.org/t/p/w185/8Ac9uuoYwZoYVAIJfRLzzLsGGJn.jpg" },
+                    { name: "Anna Gunn", role: "Skyler White", photo: "https://image.tmdb.org/t/p/w185/adppyeu1a4REN3khtgmXusrapFi.jpg" },
+                    { name: "Bob Odenkirk", role: "Saul Goodman", photo: "https://image.tmdb.org/t/p/w185/rF0Lb6SBhGSTvjRffmlKRSeI3jE.jpg" },
+                    { name: "Giancarlo Esposito", role: "Gus Fring", photo: "https://image.tmdb.org/t/p/w185/lBvDQZjxhIGMbH61iHnqerpbqHc.jpg" }
+                ]
+            },
+            {
+                title: "Dune: Part Two",
+                tmdb_id: 693134,
+                type: "movie",
+                rewatches: 1,
+                year: "2024",
+                runtime: 167,
+                poster: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
+                overview: "Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge against the conspirators who destroyed his family.",
+                cast: [
+                    { name: "Timothée Chalamet", role: "Paul Atreides", photo: "https://image.tmdb.org/t/p/w185/BE2sdjpgsa2rNTFa66f7upkaOP.jpg" },
+                    { name: "Zendaya", role: "Chani", photo: "https://image.tmdb.org/t/p/w185/3WdOloHpjtjL96uVOhFRRCcYSwq.jpg" },
+                    { name: "Rebecca Ferguson", role: "Lady Jessica", photo: "https://image.tmdb.org/t/p/w185/lJloTOheuQSirSLXNA3JHsrMNfH.jpg" },
+                    { name: "Javier Bardem", role: "Stilgar", photo: "https://image.tmdb.org/t/p/w185/eCBiiPvBfIY7exDQwH0vEM6Bf3c.jpg" },
+                    { name: "Austin Butler", role: "Feyd-Rautha", photo: "https://image.tmdb.org/t/p/w185/r9X2bd13M5P3h0H1kR2hH7Y6H5s.jpg" }
+                ]
+            },
+            {
+                title: "Severance",
+                tmdb_id: 95396,
+                type: "series",
+                rewatches: 1,
+                year: "2022",
+                runtime: 270,
+                poster: "https://image.tmdb.org/t/p/w500/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
+                overview: "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives. When a mysterious colleague appears outside of work, it begins a journey to discover the truth about their jobs.",
+                cast: [
+                    { name: "Adam Scott", role: "Mark Scout", photo: "https://image.tmdb.org/t/p/w185/b82C29R6f8c2M7S5zG7P2w1n9v.jpg" },
+                    { name: "Britt Lower", role: "Helly Riggs", photo: "https://image.tmdb.org/t/p/w185/2d5b7Z6c9e0F3g4H5i6J7k8L9m0.jpg" },
+                    { name: "Patricia Arquette", role: "Harmony Cobel", photo: "https://image.tmdb.org/t/p/w185/citation_needed.jpg" },
+                    { name: "John Turturro", role: "Irving Bailiff", photo: "https://image.tmdb.org/t/p/w185/6O9W9c7B5N4M3L2K1J0I9H8G7F6.jpg" }
+                ]
+            },
+            {
+                title: "The Dark Knight",
+                tmdb_id: 155,
+                type: "movie",
+                rewatches: 5,
+                year: "2008",
+                runtime: 152,
+                poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
+                overview: "Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets.",
+                cast: [
+                    { name: "Christian Bale", role: "Bruce Wayne", photo: "https://image.tmdb.org/t/p/w185/qCpZn2e3dimwbryLnqxZuI88PTi.jpg" },
+                    { name: "Heath Ledger", role: "Joker", photo: "https://image.tmdb.org/t/p/w185/5Y9HnYYa9jF4NunY9lSgJGjSe8E.jpg" },
+                    { name: "Aaron Eckhart", role: "Harvey Dent", photo: "https://image.tmdb.org/t/p/w185/6r2R3F4G5H6J7K8L9M0N1P2Q3R4.jpg" },
+                    { name: "Gary Oldman", role: "James Gordon", photo: "https://image.tmdb.org/t/p/w185/2v9FVVBUrrkW2m3QOcYkuhq9A6o.jpg" },
+                    { name: "Michael Caine", role: "Alfred", photo: "https://image.tmdb.org/t/p/w185/hZruclwEPCKw3e83rnFSIH5sRFZ.jpg" }
+                ]
+            }
+        ];
+
+        // Extra catalog for instant search preview when in Demo Mode (no API key yet)
+        const DEMO_SEARCH_CATALOG = [
+            {
+                title: "Oppenheimer",
+                tmdb_id: 872585,
+                type: "movie",
+                year: "2023",
+                runtime: 181,
+                poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+                overview: "The story of J. Robert Oppenheimer's role in the development of the atomic bomb during World War II.",
+                cast: [
+                    { name: "Cillian Murphy", role: "J. Robert Oppenheimer", photo: "https://image.tmdb.org/t/p/w185/dm6V24JJJVKB7qNv4T2Yq7N9J8N.jpg" },
+                    { name: "Emily Blunt", role: "Kitty Oppenheimer", photo: "https://image.tmdb.org/t/p/w185/5nCSG5TL1bP1geD8aaBfaLnLLCD.jpg" },
+                    { name: "Matt Damon", role: "Leslie Groves", photo: "https://image.tmdb.org/t/p/w185/At3JgvaNeEN4Z4ESKlhhes85Xo3.jpg" },
+                    { name: "Robert Downey Jr.", role: "Lewis Strauss", photo: "https://image.tmdb.org/t/p/w185/im9SAqJPZKEbVZGmjXuLI4O7RvM.jpg" }
+                ]
+            },
+            {
+                title: "Stranger Things",
+                tmdb_id: 66732,
+                type: "series",
+                year: "2016",
+                runtime: 340,
+                poster: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
+                overview: "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.",
+                cast: [
+                    { name: "Millie Bobby Brown", role: "Eleven", photo: "https://image.tmdb.org/t/p/w185/2685xGmq68G6t0U77P6V6U2I7sD.jpg" },
+                    { name: "Finn Wolfhard", role: "Mike Wheeler", photo: "https://image.tmdb.org/t/p/w185/5OV5qu2075B8G2d1h7s7v9c3C3A.jpg" },
+                    { name: "Winona Ryder", role: "Joyce Byers", photo: "https://image.tmdb.org/t/p/w185/5yteOSY2lgGOgSWmRTlxqfY59MS.jpg" },
+                    { name: "David Harbour", role: "Jim Hopper", photo: "https://image.tmdb.org/t/p/w185/chPekukMF5SNnW6b22NbYPqAStr.jpg" }
+                ]
+            },
+            {
+                title: "The Matrix",
+                tmdb_id: 603,
+                type: "movie",
+                year: "1999",
+                runtime: 136,
+                poster: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
+                overview: "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
+                cast: [
+                    { name: "Keanu Reeves", role: "Neo", photo: "https://image.tmdb.org/t/p/w185/4D0PpNI0kmP58hgrwGC3wCjxhnm.jpg" },
+                    { name: "Laurence Fishburne", role: "Morpheus", photo: "https://image.tmdb.org/t/p/w185/8suOhUmPbfKqDQ17jQ1Gy0mI3P4.jpg" },
+                    { name: "Carrie-Anne Moss", role: "Trinity", photo: "https://image.tmdb.org/t/p/w185/xD4jTA3KmVp5Rq3aHcymL9DUGjD.jpg" }
+                ]
+            },
+            {
+                title: "Arcane",
+                tmdb_id: 94605,
+                type: "series",
+                year: "2021",
+                runtime: 360,
+                poster: "https://image.tmdb.org/t/p/w500/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
+                overview: "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war between magic technologies and clashing convictions.",
+                cast: [
+                    { name: "Hailee Steinfeld", role: "Vi (voice)", photo: "https://image.tmdb.org/t/p/w185/dxSDWkiVaC6JYjrV3XRAZI7HOSS.jpg" },
+                    { name: "Ella Purnell", role: "Jinx (voice)", photo: "https://image.tmdb.org/t/p/w185/xY5v3N7z2W9T6R5H8K1M4P7Q2S.jpg" }
+                ]
+            },
+            {
+                title: "Spider-Man: Across the Spider-Verse",
+                tmdb_id: 569094,
+                type: "movie",
+                year: "2023",
+                runtime: 140,
+                poster: "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
+                overview: "After reuniting with Gwen Stacy, Brooklyn’s full-time, friendly neighborhood Spider-Man is catapulted across the Multiverse.",
+                cast: [
+                    { name: "Shameik Moore", role: "Miles Morales (voice)", photo: "https://image.tmdb.org/t/p/w185/uJNaST3uC0s2d3F8G5H7J9K1L2M.jpg" },
+                    { name: "Hailee Steinfeld", role: "Gwen Stacy (voice)", photo: "https://image.tmdb.org/t/p/w185/dxSDWkiVaC6JYjrV3XRAZI7HOSS.jpg" },
+                    { name: "Oscar Isaac", role: "Miguel O'Hara (voice)", photo: "https://image.tmdb.org/t/p/w185/dW5U5yrIIPmMjRThR9KT2xH6nTz.jpg" }
+                ]
+            }
+        ];
+
+        // ============================================================================
+        // 2. STATE & CONFIGURATION
+        // ============================================================================
+        const IMG_BASE_URL = "https://image.tmdb.org/t/p/w500";
+        const PROFILE_BASE_URL = "https://image.tmdb.org/t/p/w185";
+        let state = {
+            items: [],
+            activeFilter: 'all',
+            searchQuery: '',
+            selectedIndex: null,
+            tmdbKey: localStorage.getItem('cinetrack_tmdb_key') || '',
+            sheetUrl: localStorage.getItem('cinetrack_sheet_url') || ''
+        };
+
+        // Helper to generate SVG initials avatar fallback when an actor photo fails to load
+        function getAvatarFallback(name) {
+            const encoded = encodeURIComponent(name || 'Actor');
+            return `https://placehold.co/185x185/1c1e2d/c4b5fd?text=${encoded}`;
+        }
+
+        // ============================================================================
+        // 3. DATA FETCHING (Live Google Sheet + TMDB Credits or Demo Mode)
+        // ============================================================================
+        async function initApp() {
+            const badge = document.getElementById('mode-badge');
+            document.getElementById('config-tmdb-key').value = state.tmdbKey;
+            document.getElementById('config-sheet-url').value = state.sheetUrl;
+
+            if (state.tmdbKey && state.sheetUrl) {
+                badge.textContent = "Live Google Sheet";
+                badge.className = "text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                await loadFromGoogleSheet();
+            } else {
+                badge.textContent = "Demo Mode";
+                badge.className = "text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30";
+                const savedDemo = localStorage.getItem('cinetrack_demo_items');
+                state.items = savedDemo ? JSON.parse(savedDemo) : [...DEMO_WATCHLIST];
+                renderAll();
+            }
+        }
+
+        async function loadFromGoogleSheet() {
+            showStatus("Syncing watchlist from Google Sheets & TMDB API...");
+            try {
+                const res = await fetch(state.sheetUrl);
+                const json = await res.json();
+                const rawRows = json.data || [];
+
+                const enriched = await Promise.all(rawRows.map(async (row) => {
+                    return await fetchTmdbDetailsAndCast(row);
+                }));
+
+                state.items = enriched.filter(Boolean);
+                hideStatus();
+                renderAll();
+            } catch (err) {
+                console.error("Sheet sync error:", err);
+                showStatus("Could not reach Google Sheet URL. Showing cached/demo entries instead.");
+                state.items = [...DEMO_WATCHLIST];
+                renderAll();
+            }
+        }
+
+        // Uses TMDB append_to_response=credits to get Poster, Details & Cast in ONE single free request
+        async function fetchTmdbDetailsAndCast(item) {
+            if (!state.tmdbKey || window.location.protocol === 'file:') {
+                const matchDemo = [...DEMO_WATCHLIST, ...DEMO_SEARCH_CATALOG].find(
+                    d => Number(d.tmdb_id) === Number(item.tmdb_id) || d.title.toLowerCase() === (item.title || '').toLowerCase()
+                );
+                if (matchDemo) {
+                    return { ...matchDemo, rewatches: Number(item.rewatches || 1) };
+                }
+                return {
+                    title: item.title,
+                    tmdb_id: item.tmdb_id,
+                    type: item.type || 'movie',
+                    rewatches: item.rewatches || 1,
+                    year: "Added",
+                    runtime: item.type === 'series' ? 240 : 120,
+                    poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=80",
+                    overview: "Running from a local file:// origin. Use a local server (like Live Server in VS Code) or connect your free TMDB API Key in Settings to fetch live posters and credits.",
+                    cast: [{ name: "Demo Actor", role: "Main Role", photo: "https://image.tmdb.org/t/p/w185/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg" }],
+                    similar: []
+                };
+            }
+
+            const endpoint = (item.type || '').toLowerCase() === 'series' ? 'tv' : 'movie';
+            const url = `https://api.themoviedb.org/3/${endpoint}/${item.tmdb_id}?api_key=${state.tmdbKey}&append_to_response=credits,similar`;
+
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+                const topCast = (data.credits && data.credits.cast ? data.credits.cast.slice(0, 10) : []).map(c => ({
+                    name: c.name,
+                    role: c.character || 'Cast',
+                    photo: c.profile_path ? `${PROFILE_BASE_URL}${c.profile_path}` : getAvatarFallback(c.name)
+                }));
+
+                const similarList = (data.similar && data.similar.results ? data.similar.results.slice(0, 4) : []).map(s => ({
+                    id: s.id,
+                    title: s.title || s.name,
+                    type: endpoint === 'tv' ? 'series' : 'movie',
+                    poster: s.poster_path ? `${PROFILE_BASE_URL}${s.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Image'
+                }));
+
+                const releaseDate = data.release_date || data.first_air_date || '';
+                return {
+                    title: data.title || data.name || item.title,
+                    tmdb_id: item.tmdb_id,
+                    type: endpoint === 'tv' ? 'series' : 'movie',
+                    rewatches: Number(item.rewatches || 1),
+                    year: releaseDate ? releaseDate.split('-')[0] : 'N/A',
+                    runtime: data.runtime || (endpoint === 'tv' ? 300 : 120),
+                    poster: data.poster_path ? `${IMG_BASE_URL}${data.poster_path}` : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=80",
+                    overview: data.overview || "No description available.",
+                    cast: topCast,
+                    similar: similarList
+                };
+            } catch (error) {
+                console.error("TMDB error:", error);
+                const matchDemo = [...DEMO_WATCHLIST, ...DEMO_SEARCH_CATALOG].find(
+                    d => Number(d.tmdb_id) === Number(item.tmdb_id)
+                );
+                return matchDemo ? { ...matchDemo, rewatches: Number(item.rewatches || 1) } : null;
+            }
+        }
+
+        // ============================================================================
+        // 4. MINIMALIST CARD RENDERING & STATS
+        // ============================================================================
+        function renderAll() {
+            updateStats();
+            const grid = document.getElementById('watchlist-grid');
+            const emptyState = document.getElementById('empty-state');
+            grid.innerHTML = '';
+
+            const filtered = state.items.filter((item) => {
+                const matchesType = state.activeFilter === 'all' || item.type === state.activeFilter;
+                const q = state.searchQuery.toLowerCase().trim();
+                const matchesTitle = item.title.toLowerCase().includes(q);
+                const matchesCast = (item.cast || []).some(actor => actor.name.toLowerCase().includes(q));
+                return matchesType && (!q || matchesTitle || matchesCast);
+            });
+
+            if (filtered.length === 0) {
+                emptyState.classList.remove('hidden');
+                return;
+            }
+            emptyState.classList.add('hidden');
+
+            filtered.forEach((item) => {
+                const originalIndex = state.items.indexOf(item);
+                const card = document.createElement('div');
+                card.className = "poster-card group cursor-pointer rounded-2xl bg-surface-800 overflow-hidden border border-white/5 flex flex-col";
+                card.onclick = () => openDetailsModal(originalIndex);
+
+                // Minimalist front view: Poster + Title (with subtle hover cue for Cast)
+                card.innerHTML = `
+                    <div class="relative aspect-[2/3] w-full bg-surface-900 overflow-hidden">
+                        <img src="${item.poster}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-3">
+                            <span class="text-[11px] font-medium text-violet-300 flex items-center gap-1">
+                                View Cast & Credits &rarr;
+                            </span>
+                        </div>
+                        ${item.rewatches > 1 ? `
+                            <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/75 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+                                ${item.rewatches}x
+                            </span>
+                        ` : ''}
+                    </div>
+                    <div class="p-3.5 text-center">
+                        <h3 class="font-medium text-sm text-gray-100 truncate group-hover:text-violet-400 transition">${item.title}</h3>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function updateStats() {
+            const total = state.items.length;
+            const totalMinutes = state.items.reduce((acc, item) => acc + ((item.runtime || 120) * (item.rewatches || 1)), 0);
+            const totalRewatches = state.items.reduce((acc, item) => acc + (item.rewatches || 1), 0);
+
+            document.getElementById('stat-total').textContent = total;
+            document.getElementById('stat-hours').textContent = `${Math.round(totalMinutes / 60)} hrs`;
+            document.getElementById('stat-rewatches').textContent = totalRewatches;
+        }
+
+        // ============================================================================
+        // 5. INTERACTIVE FEATURES (Cast Modal, Random Picker, Filters, Add Entry)
+        // ============================================================================
+        function openDetailsModal(index) {
+            state.selectedIndex = index;
+            const item = state.items[index];
+            if (!item) return;
+
+            document.getElementById('modal-poster').src = item.poster;
+            document.getElementById('modal-poster').alt = item.title;
+            document.getElementById('modal-type').textContent = item.type.toUpperCase();
+            document.getElementById('modal-title').textContent = item.title;
+            document.getElementById('modal-meta').textContent = `${item.year || ''} • ~${item.runtime || 120} mins`;
+            document.getElementById('modal-overview').textContent = item.overview || '';
+            document.getElementById('modal-rewatch').textContent = item.rewatches || 1;
+            document.getElementById('modal-tmdb-id').textContent = `TMDB #${item.tmdb_id}`;
+
+            const castContainer = document.getElementById('modal-cast');
+            castContainer.innerHTML = '';
+            (item.cast || []).forEach(actor => {
+                const avatarSrc = actor.photo || getAvatarFallback(actor.name);
+                const fallbackUrl = getAvatarFallback(actor.name);
+                const card = document.createElement('button');
+                card.type = 'button';
+                card.onclick = () => filterByActor(actor.name);
+                card.className = "group/actor flex-shrink-0 w-24 sm:w-28 snap-start bg-surface-900/90 hover:bg-surface-700/80 p-2.5 rounded-xl border border-white/5 hover:border-violet-500/40 transition flex flex-col items-center text-center";
+                card.title = `Filter watchlist by ${actor.name}`;
+                card.innerHTML = `
+                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-surface-800 border-2 border-white/10 group-hover/actor:border-violet-400 transition shadow-md mb-2">
+                        <img 
+                            src="${avatarSrc}" 
+                            alt="${actor.name}" 
+                            onerror="this.onerror=null;this.src='${fallbackUrl}';"
+                            class="w-full h-full object-cover group-hover/actor:scale-105 transition duration-300"
+                        >
+                    </div>
+                    <span class="text-xs font-semibold text-white group-hover/actor:text-violet-300 transition line-clamp-1 w-full">${actor.name}</span>
+                    <span class="text-[11px] text-gray-400 line-clamp-1 w-full mt-0.5">${actor.role}</span>
+                `;
+                castContainer.appendChild(card);
+            });
+
+            // Render Similar Recommendations inside modal
+            const recContainer = document.getElementById('modal-recommendations');
+            recContainer.innerHTML = '';
+            const sims = item.similar && item.similar.length > 0 ? item.similar : [
+                { id: 603, title: "The Matrix", type: "movie", poster: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg" },
+                { id: 872585, title: "Oppenheimer", type: "movie", poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" }
+            ];
+
+            sims.forEach(sim => {
+                const simCard = document.createElement('div');
+                simCard.className = "flex-shrink-0 w-28 bg-surface-900/90 rounded-xl overflow-hidden border border-white/5 p-2 flex flex-col justify-between group/sim";
+                simCard.innerHTML = `
+                    <div>
+                        <div class="aspect-[2/3] w-full rounded-lg overflow-hidden bg-surface-800 mb-1.5">
+                            <img src="${sim.poster}" alt="${sim.title}" class="w-full h-full object-cover group-hover/sim:scale-105 transition">
+                        </div>
+                        <h4 class="text-[11px] font-medium text-white truncate">${sim.title}</h4>
+                    </div>
+                    <button type="button" onclick='quickAddSimilar(${JSON.stringify(sim).replace(/'/g, "&apos;")})' class="mt-2 w-full py-1 rounded bg-violet-600/20 hover:bg-violet-600 text-violet-300 hover:text-white text-[10px] font-semibold transition border border-violet-500/30">
+                        + Add
+                    </button>
+                `;
+                recContainer.appendChild(simCard);
+            });
+
+            const modal = document.getElementById('details-modal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        async function quickAddSimilar(sim) {
+            closeDetailsModal();
+            showStatus(`Adding "${sim.title}" to watchlist...`);
+            const newRaw = { title: sim.title, tmdb_id: sim.id, type: sim.type, rewatches: 1 };
+            const enriched = await fetchTmdbDetailsAndCast(newRaw);
+            if (enriched) {
+                state.items.unshift(enriched);
+                if (!state.sheetUrl || window.location.protocol === 'file:') {
+                    localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
+                }
+                renderAll();
+                showStatus(`Added "${enriched.title}" successfully!`);
+            }
+        }
+
+        function filterByActor(actorName) {
+            closeDetailsModal();
+            const searchInput = document.getElementById('search-input');
+            searchInput.value = actorName;
+            handleSearch(actorName);
+            showStatus(`Filtering watchlist by actor: ${actorName}`);
+        }
+
+        function closeDetailsModal() {
+            const modal = document.getElementById('details-modal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        function updateRewatch(delta) {
+            if (state.selectedIndex === null) return;
+            const item = state.items[state.selectedIndex];
+            item.rewatches = Math.max(1, (item.rewatches || 1) + delta);
+            document.getElementById('modal-rewatch').textContent = item.rewatches;
+            if (!state.sheetUrl) {
+                localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
+            }
+            renderAll();
+        }
+
+        function pickRandomWatched() {
+            if (state.items.length === 0) return;
+            const randomIndex = Math.floor(Math.random() * state.items.length);
+            openDetailsModal(randomIndex);
+        }
+
+        function setFilter(type) {
+            state.activeFilter = type;
+            ['all', 'movie', 'series'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === type) {
+                    btn.className = "filter-tab px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white";
+                } else {
+                    btn.className = "filter-tab px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white";
+                }
+            });
+            renderAll();
+        }
+
+        function handleSearch(val) {
+            state.searchQuery = val;
+            renderAll();
+        }
+
+        // ============================================================================
+        // 6. LIVE TMDB SEARCH TO ADD MOVIES/SERIES DIRECTLY
+        // ============================================================================
+        let searchTimeout = null;
+        function debouncedTmdbSearch(query) {
+            clearTimeout(searchTimeout);
+            const resultsBox = document.getElementById('tmdb-search-results');
+            if (!query || query.trim().length < 2) {
+                resultsBox.classList.add('hidden');
+                resultsBox.innerHTML = '';
+                return;
+            }
+            searchTimeout = setTimeout(() => performTmdbSearch(query.trim()), 280);
+        }
+
+        async function performTmdbSearch(query) {
+            const resultsBox = document.getElementById('tmdb-search-results');
+            resultsBox.classList.remove('hidden');
+            resultsBox.innerHTML = `<div class="p-3 text-xs text-gray-400">Searching for "${query}"...</div>`;
+
+            // If user hasn't added their TMDB API key yet, search the built-in Demo Catalog so they can test it immediately
+            if (!state.tmdbKey) {
+                const combinedDemo = [...DEMO_SEARCH_CATALOG, ...DEMO_WATCHLIST];
+                const matches = combinedDemo.filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
+                renderSearchResults(matches.map(m => ({
+                    id: m.tmdb_id,
+                    title: m.title,
+                    type: m.type,
+                    year: m.year,
+                    poster: m.poster
+                })), true);
+                return;
+            }
+
+            try {
+                const url = `https://api.themoviedb.org/3/search/multi?api_key=${state.tmdbKey}&query=${encodeURIComponent(query)}&include_adult=false`;
+                const res = await fetch(url);
+                const data = await res.json();
+                const validResults = (data.results || [])
+                    .filter(r => r.media_type === 'movie' || r.media_type === 'tv')
+                    .slice(0, 8)
+                    .map(r => {
+                        const dateStr = r.release_date || r.first_air_date || '';
+                        return {
+                            id: r.id,
+                            title: r.title || r.name,
+                            type: r.media_type === 'tv' ? 'series' : 'movie',
+                            year: dateStr ? dateStr.split('-')[0] : 'N/A',
+                            poster: r.poster_path ? `${PROFILE_BASE_URL}${r.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster'
+                        };
+                    });
+                renderSearchResults(validResults, false);
+            } catch (err) {
+                console.error("TMDB multi-search failed:", err);
+                resultsBox.innerHTML = `<div class="p-3 text-xs text-rose-400">Error searching TMDB. Check your API key in Settings.</div>`;
+            }
+        }
+
+        function renderSearchResults(results, isDemoSearch) {
+            const resultsBox = document.getElementById('tmdb-search-results');
+            resultsBox.innerHTML = '';
+
+            if (results.length === 0) {
+                resultsBox.innerHTML = `
+                    <div class="p-3 rounded-xl bg-surface-900 border border-white/10 text-xs text-gray-400">
+                        No matches found. ${isDemoSearch ? 'Connect your free TMDB API Key in Settings (gear icon) to search millions of titles live!' : ''}
+                    </div>
+                `;
+                return;
+            }
+
+            results.forEach(item => {
+                const row = document.createElement('button');
+                row.type = 'button';
+                row.onclick = () => selectSearchResult(item);
+                row.className = "w-full p-2 rounded-xl bg-surface-900 hover:bg-surface-700 border border-white/5 hover:border-violet-500/40 transition flex items-center gap-3 text-left group";
+                row.innerHTML = `
+                    <img src="${item.poster}" alt="${item.title}" class="w-10 h-14 object-cover rounded-lg bg-surface-800 flex-shrink-0">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs font-semibold text-white group-hover:text-violet-300 truncate">${item.title}</div>
+                        <div class="text-[11px] text-gray-400 flex items-center gap-2 mt-0.5">
+                            <span class="uppercase font-bold text-[10px] px-1.5 py-0.2 rounded bg-white/5 text-violet-300">${item.type}</span>
+                            <span>${item.year}</span>
+                            <span class="font-mono text-gray-500">#${item.id}</span>
+                        </div>
+                    </div>
+                    <span class="text-[11px] font-semibold text-emerald-400 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-black transition">
+                        Select
+                    </span>
+                `;
+                resultsBox.appendChild(row);
+            });
+        }
+
+        function selectSearchResult(item) {
+            document.getElementById('input-title').value = item.title;
+            document.getElementById('input-tmdb-id').value = item.id;
+            document.getElementById('input-type').value = item.type;
+            document.getElementById('tmdb-search-results').classList.add('hidden');
+            document.getElementById('tmdb-search-query').value = '';
+        }
+
+        // Add Modal Handlers
+        function openAddModal() {
+            const m = document.getElementById('add-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            setTimeout(() => document.getElementById('tmdb-search-query').focus(), 50);
+        }
+        function closeAddModal() {
+            const m = document.getElementById('add-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+            document.getElementById('tmdb-search-results').classList.add('hidden');
+            document.getElementById('tmdb-search-query').value = '';
+        }
+
+        async function handleAddEntry(e) {
+            e.preventDefault();
+            const title = document.getElementById('input-title').value.trim();
+            const tmdb_id = Number(document.getElementById('input-tmdb-id').value.trim());
+            const type = document.getElementById('input-type').value;
+
+            closeAddModal();
+            showStatus(`Adding "${title}" to your watchlist...`);
+
+            const newEntryRaw = { title, tmdb_id, type, rewatches: 1 };
+
+            // Post to Google Sheet if configured
+            if (state.sheetUrl) {
+                try {
+                    await fetch(state.sheetUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(newEntryRaw)
+                    });
+                } catch (err) {
+                    console.error("Failed posting to sheet:", err);
+                }
+            }
+
+            const enriched = await fetchTmdbDetailsAndCast(newEntryRaw);
+            if (enriched) {
+                state.items.unshift(enriched);
+                if (!state.sheetUrl) {
+                    localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
+                }
+                renderAll();
+                showStatus(`Added "${enriched.title}"!`);
+            }
+            e.target.reset();
+        }
+
+        // Setup Modal Handlers
+        function openSetupModal() {
+            const m = document.getElementById('setup-modal');
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+        }
+        function closeSetupModal() {
+            const m = document.getElementById('setup-modal');
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function saveConfiguration() {
+            state.tmdbKey = document.getElementById('config-tmdb-key').value.trim();
+            state.sheetUrl = document.getElementById('config-sheet-url').value.trim();
+            localStorage.setItem('cinetrack_tmdb_key', state.tmdbKey);
+            localStorage.setItem('cinetrack_sheet_url', state.sheetUrl);
+            closeSetupModal();
+            initApp();
+        }
+
+        function resetToDemo() {
+            localStorage.removeItem('cinetrack_tmdb_key');
+            localStorage.removeItem('cinetrack_sheet_url');
+            localStorage.removeItem('cinetrack_demo_items');
+            state.tmdbKey = '';
+            state.sheetUrl = '';
+            closeSetupModal();
+            initApp();
+        }
+
+        function showStatus(msg) {
+            const banner = document.getElementById('status-banner');
+            document.getElementById('status-message').textContent = msg;
+            banner.classList.remove('hidden');
+        }
+        function hideStatus() {
+            document.getElementById('status-banner').classList.add('hidden');
+        }
+
+        // Close modals on Escape key
+        window.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeDetailsModal();
+                closeAddModal();
+                closeSetupModal();
+            }
+        });
+
+        // Boot the application
+        initApp();
+    </script>
+</body>
+</html>
