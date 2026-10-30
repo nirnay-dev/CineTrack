@@ -148,16 +148,37 @@
     <section class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6 pb-2">
         <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
             <!-- Category Tabs -->
-            <div class="inline-flex p-1 rounded-xl bg-surface-800 border border-white/5 self-start">
-                <button onclick="setFilter('all')" id="tab-all" class="filter-tab px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white">
-                    All Watched
-                </button>
-                <button onclick="setFilter('movie')" id="tab-movie" class="filter-tab px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white">
-                    Movies
-                </button>
-                <button onclick="setFilter('series')" id="tab-series" class="filter-tab px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white">
-                    Series
-                </button>
+            <div class="flex flex-wrap items-center gap-2">
+                <div class="inline-flex p-1 rounded-xl bg-surface-800 border border-white/5">
+                    <button onclick="setFilter('all')" id="tab-all" class="filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white">
+                        All
+                    </button>
+                    <button onclick="setFilter('movie')" id="tab-movie" class="filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white">
+                        Movies
+                    </button>
+                    <button onclick="setFilter('series')" id="tab-series" class="filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white">
+                        Series
+                    </button>
+                </div>
+
+                <!-- Industry / Region Category Filter -->
+                <div class="inline-flex p-1 rounded-xl bg-surface-800 border border-white/5 overflow-x-auto">
+                    <button onclick="setIndustryFilter('all')" id="ind-all" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition bg-violet-600/30 text-violet-200 border border-violet-500/30">
+                        All Industries
+                    </button>
+                    <button onclick="setIndustryFilter('hollywood')" id="ind-hollywood" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white">
+                        🎬 Hollywood
+                    </button>
+                    <button onclick="setIndustryFilter('bollywood')" id="ind-bollywood" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white">
+                        🇮🇳 Bollywood / Indian
+                    </button>
+                    <button onclick="setIndustryFilter('anime')" id="ind-anime" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white">
+                        🇯🇵 Anime / Japanese
+                    </button>
+                    <button onclick="setIndustryFilter('kdrama')" id="ind-kdrama" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white">
+                        🇰🇷 K-Drama / Korean
+                    </button>
+                </div>
             </div>
 
             <!-- Search Input -->
@@ -169,7 +190,7 @@
                     type="text" 
                     id="search-input" 
                     oninput="handleSearch(this.value)"
-                    placeholder="Filter by title or actor..." 
+                    placeholder="Filter by title, actor, or industry..." 
                     class="w-full pl-10 pr-4 py-2 rounded-xl bg-surface-800 border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
                 >
             </div>
@@ -207,9 +228,14 @@
                 <div class="sm:w-3/5 p-6 flex flex-col justify-between overflow-hidden">
                     <div>
                         <div class="flex items-start justify-between gap-2">
-                            <span id="modal-type" class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-violet-500/20 text-violet-300 border border-violet-500/30">
-                                MOVIE
-                            </span>
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span id="modal-type" class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                                    MOVIE
+                                </span>
+                                <span id="modal-industry" class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                    HOLLYWOOD
+                                </span>
+                            </div>
                             <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white p-1 rounded-lg">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -278,20 +304,20 @@
 
     <!-- Add Movie / Series Modal -->
     <div id="add-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="glass-panel w-full max-w-lg rounded-2xl p-6 border border-white/15 max-h-[90vh] flex flex-col">
+        <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 border border-white/15 max-h-[90vh] flex flex-col">
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h3 class="font-display text-lg font-bold text-white">Search & Add to Watchlist</h3>
-                    <p class="text-xs text-gray-400">Search TMDB directly or enter details manually</p>
+                    <p class="text-xs text-gray-400">Search TMDB directly, review details & preview before confirming</p>
                 </div>
                 <button onclick="closeAddModal()" class="text-gray-400 hover:text-white text-xl leading-none">&times;</button>
             </div>
 
-            <!-- Live TMDB Search Box -->
-            <div class="mb-4">
-                <label class="block text-xs font-semibold uppercase tracking-wider text-violet-400 mb-1.5">1. Search Movie or Series</label>
-                <div class="flex gap-2">
-                    <div class="relative flex-1">
+            <div class="overflow-y-auto pr-1 flex-1 space-y-4">
+                <!-- Live TMDB Search Box -->
+                <div>
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-violet-400 mb-1.5">1. Search Movie or Series</label>
+                    <div class="relative">
                         <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
@@ -299,44 +325,68 @@
                             type="text" 
                             id="tmdb-search-query" 
                             oninput="debouncedTmdbSearch(this.value)"
-                            placeholder="Type a title (e.g. Oppenheimer, Arcane, Stranger Things)..." 
+                            placeholder="Type a title (e.g. Oppenheimer, 3 Idiots, Arcane, Dune)..." 
                             class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-900 border border-white/15 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
                         >
                     </div>
+                    <!-- Search Results Dropdown List (Expanded with larger posters & synopsis) -->
+                    <div id="tmdb-search-results" class="mt-2.5 max-h-64 overflow-y-auto space-y-2 hidden pr-1">
+                        <!-- Dynamically populated search results -->
+                    </div>
                 </div>
-                <!-- Search Results Dropdown List -->
-                <div id="tmdb-search-results" class="mt-2 max-h-56 overflow-y-auto space-y-1.5 hidden pr-1">
-                    <!-- Dynamically populated search results -->
+
+                <hr class="border-white/10">
+
+                <!-- Selected Movie/Series Confirmation Preview Card -->
+                <div id="selected-preview-card" class="hidden p-3.5 rounded-xl bg-surface-900/90 border border-violet-500/40">
+                    <div class="flex gap-4">
+                        <img id="preview-poster" src="" alt="Poster" class="w-20 h-28 object-cover rounded-lg bg-surface-800 shadow-md flex-shrink-0">
+                        <div class="flex-1 min-w-0 flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <span id="preview-type-badge" class="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">MOVIE</span>
+                                    <span id="preview-year" class="text-xs text-gray-400 font-medium"></span>
+                                    <span id="preview-rating" class="text-xs text-amber-400 font-semibold flex items-center gap-1"></span>
+                                    <span id="preview-industry" class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30"></span>
+                                </div>
+                                <h4 id="preview-title" class="font-display font-bold text-base text-white mt-1"></h4>
+                                <p id="preview-overview" class="text-xs text-gray-300 mt-1 line-clamp-2 leading-relaxed"></p>
+                            </div>
+                            <span class="text-[11px] text-emerald-400 font-medium flex items-center gap-1 mt-1">
+                                ✓ Verified Selection Ready to Add
+                            </span>
+                        </div>
+                    </div>
                 </div>
+
+                <!-- Selected / Form Details Confirmation -->
+                <form onsubmit="handleAddEntry(event)" class="space-y-3">
+                    <label class="block text-xs font-semibold uppercase tracking-wider text-emerald-400">2. Confirm & Add</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="sm:col-span-2">
+                            <label class="block text-xs font-medium text-gray-300 mb-1">Title</label>
+                            <input type="text" id="input-title" required placeholder="Select a title from search above..." class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-gray-300 mb-1">Type</label>
+                            <select id="input-type" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
+                                <option value="movie">Movie</option>
+                                <option value="series">Series (TV)</option>
+                            </select>
+                        </div>
+                    </div>
+                    <input type="hidden" id="input-tmdb-id" required>
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-xl bg-surface-700 text-xs font-medium text-gray-300">Cancel</button>
+                        <button type="submit" id="btn-submit-entry" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white shadow-lg shadow-violet-600/25 flex items-center gap-1.5">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            <span>Add to Watchlist</span>
+                        </button>
+                    </div>
+                </form>
             </div>
-
-            <hr class="border-white/10 my-2">
-
-            <!-- Selected / Manual Entry Form -->
-            <form onsubmit="handleAddEntry(event)" class="space-y-4 pt-2">
-                <label class="block text-xs font-semibold uppercase tracking-wider text-emerald-400">2. Confirm Selected Details</label>
-                <div>
-                    <label class="block text-xs font-medium text-gray-300 mb-1">Title</label>
-                    <input type="text" id="input-title" required placeholder="Selected title will appear here..." class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
-                </div>
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-300 mb-1">TMDB ID</label>
-                        <input type="number" id="input-tmdb-id" required placeholder="Auto-filled ID" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white font-mono focus:outline-none focus:border-accent">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-300 mb-1">Type</label>
-                        <select id="input-type" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
-                            <option value="movie">Movie</option>
-                            <option value="series">Series (TV)</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-xl bg-surface-700 text-xs font-medium text-gray-300">Cancel</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white shadow-lg shadow-violet-600/25">Add to Sheet & Watchlist</button>
-                </div>
-            </form>
         </div>
     </div>
 
@@ -360,11 +410,36 @@
         let state = {
             items: [],
             activeFilter: 'all',
+            activeIndustry: 'all',
             searchQuery: '',
             selectedIndex: null,
             tmdbKey: DEFAULT_TMDB_KEY,
             sheetUrl: DEFAULT_SHEET_URL
         };
+
+        // Helper to determine industry/region based on original language & country
+        function detectIndustry(lang = '', country = '') {
+            const l = (lang || '').toLowerCase();
+            const c = (country || '').toUpperCase();
+
+            // Indian Cinema: Hindi, Telugu, Tamil, Malayalam, Kannada, Punjabi, Bengali, Marathi, Gujarati
+            if (['hi', 'te', 'ta', 'ml', 'kn', 'pa', 'bn', 'mr', 'gu'].includes(l) || c === 'IN') {
+                return { key: 'bollywood', label: 'Bollywood / Indian' };
+            }
+            // Japanese / Anime
+            if (l === 'ja' || c === 'JP') {
+                return { key: 'anime', label: 'Anime / Japanese' };
+            }
+            // Korean / K-Drama
+            if (l === 'ko' || c === 'KR') {
+                return { key: 'kdrama', label: 'K-Drama / Korean' };
+            }
+            // Hollywood & Western International
+            if (l === 'en' || ['US', 'GB', 'CA', 'AU'].includes(c)) {
+                return { key: 'hollywood', label: 'Hollywood' };
+            }
+            return { key: 'world', label: 'World Cinema' };
+        }
 
         // Helper to generate SVG initials avatar fallback when an actor photo fails to load
         function getAvatarFallback(name) {
@@ -377,7 +452,7 @@
         // ============================================================================
         async function initApp() {
             const badge = document.getElementById('mode-badge');
-            if (state.sheetUrl && window.location.protocol !== 'file:') {
+            if (state.sheetUrl) {
                 badge.textContent = "Live Synced";
                 badge.className = "text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
                 await loadFromGoogleSheet();
@@ -421,14 +496,15 @@
             } catch (err) {
                 console.error("Sheet sync error:", err);
                 showStatus("Could not reach Google Sheet URL. Showing cached/demo entries instead.");
-                state.items = [...DEMO_WATCHLIST];
+                const savedDemo = localStorage.getItem('cinetrack_demo_items');
+                state.items = savedDemo ? JSON.parse(savedDemo) : [...DEMO_WATCHLIST];
                 renderAll();
             }
         }
 
         // Uses TMDB append_to_response=credits to get Poster, Details & Cast in ONE single free request
         async function fetchTmdbDetailsAndCast(item) {
-            if (!state.tmdbKey || window.location.protocol === 'file:') {
+            if (!state.tmdbKey) {
                 const matchDemo = [...DEMO_WATCHLIST, ...DEMO_SEARCH_CATALOG].find(
                     d => Number(d.tmdb_id) === Number(item.tmdb_id) || d.title.toLowerCase() === (item.title || '').toLowerCase()
                 );
@@ -443,8 +519,8 @@
                     year: "Added",
                     runtime: item.type === 'series' ? 240 : 120,
                     poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=80",
-                    overview: "Running from a local file:// origin. Use a local server (like Live Server in VS Code) or connect your free TMDB API Key in Settings to fetch live posters and credits.",
-                    cast: [{ name: "Demo Actor", role: "Main Role", photo: "https://image.tmdb.org/t/p/w185/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg" }],
+                    overview: "Connect your TMDB key to fetch live description.",
+                    cast: [{ name: "Cast Member", role: "Role", photo: "https://image.tmdb.org/t/p/w185/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg" }],
                     similar: []
                 };
             }
@@ -469,10 +545,16 @@
                 }));
 
                 const releaseDate = data.release_date || data.first_air_date || '';
+                const origLang = data.original_language || '';
+                const origCountry = (data.origin_country && data.origin_country[0]) || (data.production_countries && data.production_countries[0] && data.production_countries[0].iso_3166_1) || '';
+                const industryInfo = detectIndustry(origLang, origCountry);
+
                 return {
                     title: data.title || data.name || item.title,
                     tmdb_id: item.tmdb_id,
                     type: endpoint === 'tv' ? 'series' : 'movie',
+                    industry: industryInfo.key,
+                    industryLabel: industryInfo.label,
                     rewatches: Number(item.rewatches || 1),
                     year: releaseDate ? releaseDate.split('-')[0] : 'N/A',
                     runtime: data.runtime || (endpoint === 'tv' ? 300 : 120),
@@ -501,10 +583,12 @@
 
             const filtered = state.items.filter((item) => {
                 const matchesType = state.activeFilter === 'all' || item.type === state.activeFilter;
+                const matchesIndustry = state.activeIndustry === 'all' || item.industry === state.activeIndustry;
                 const q = state.searchQuery.toLowerCase().trim();
                 const matchesTitle = item.title.toLowerCase().includes(q);
                 const matchesCast = (item.cast || []).some(actor => actor.name.toLowerCase().includes(q));
-                return matchesType && (!q || matchesTitle || matchesCast);
+                const matchesIndustryText = (item.industryLabel || '').toLowerCase().includes(q);
+                return matchesType && matchesIndustry && (!q || matchesTitle || matchesCast || matchesIndustryText);
             });
 
             if (filtered.length === 0) {
@@ -519,13 +603,18 @@
                 card.className = "poster-card group cursor-pointer rounded-2xl bg-surface-800 overflow-hidden border border-white/5 flex flex-col";
                 card.onclick = () => openDetailsModal(originalIndex);
 
-                // Minimalist front view: Poster + Title (with subtle hover cue for Cast)
+                // Minimalist front view: Poster + Title + Subtle Industry & Rewatch Badges
                 card.innerHTML = `
                     <div class="relative aspect-[2/3] w-full bg-surface-900 overflow-hidden">
                         <img src="${item.poster}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
                         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-3">
                             <span class="text-[11px] font-medium text-violet-300 flex items-center gap-1">
                                 View Cast & Credits &rarr;
+                            </span>
+                        </div>
+                        <div class="absolute top-2.5 left-2.5">
+                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/75 text-amber-300 border border-amber-500/30 backdrop-blur-md">
+                                ${item.industry === 'bollywood' ? '🇮🇳 Bollywood' : item.industry === 'anime' ? '🇯🇵 Anime' : item.industry === 'kdrama' ? '🇰🇷 K-Drama' : 'Hollywood'}
                             </span>
                         </div>
                         ${item.rewatches > 1 ? `
@@ -563,6 +652,12 @@
             document.getElementById('modal-poster').src = item.poster;
             document.getElementById('modal-poster').alt = item.title;
             document.getElementById('modal-type').textContent = item.type.toUpperCase();
+            
+            const modalIndustry = document.getElementById('modal-industry');
+            if (modalIndustry) {
+                modalIndustry.textContent = (item.industryLabel || 'Hollywood').toUpperCase();
+            }
+
             document.getElementById('modal-title').textContent = item.title;
             document.getElementById('modal-meta').textContent = `${item.year || ''} • ~${item.runtime || 120} mins`;
             document.getElementById('modal-overview').textContent = item.overview || '';
@@ -640,7 +735,7 @@
             const enriched = await fetchTmdbDetailsAndCast(newRaw);
             if (enriched) {
                 state.items.unshift(enriched);
-                if (!state.sheetUrl || window.location.protocol === 'file:') {
+                if (!state.sheetUrl) {
                     localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
                 }
                 renderAll();
@@ -674,7 +769,7 @@
             closeDetailsModal();
 
             // Update local storage if in demo / offline mode
-            if (!state.sheetUrl || window.location.protocol === 'file:') {
+            if (!state.sheetUrl) {
                 localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
             } else {
                 // Inform Google Sheet to delete row if supported by backend script
@@ -716,9 +811,23 @@
             ['all', 'movie', 'series'].forEach(t => {
                 const btn = document.getElementById(`tab-${t}`);
                 if (t === type) {
-                    btn.className = "filter-tab px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white";
+                    btn.className = "filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white";
                 } else {
-                    btn.className = "filter-tab px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white";
+                    btn.className = "filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white";
+                }
+            });
+            renderAll();
+        }
+
+        function setIndustryFilter(industry) {
+            state.activeIndustry = industry;
+            ['all', 'hollywood', 'bollywood', 'anime', 'kdrama'].forEach(ind => {
+                const btn = document.getElementById(`ind-${ind}`);
+                if (!btn) return;
+                if (ind === industry) {
+                    btn.className = "ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition bg-violet-600/30 text-violet-200 border border-violet-500/30";
+                } else {
+                    btn.className = "ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white";
                 }
             });
             renderAll();
@@ -772,18 +881,24 @@
                     .slice(0, 8)
                     .map(r => {
                         const dateStr = r.release_date || r.first_air_date || '';
+                        const origLang = r.original_language || '';
+                        const origCountry = (r.origin_country && r.origin_country[0]) || '';
+                        const ind = detectIndustry(origLang, origCountry);
                         return {
                             id: r.id,
                             title: r.title || r.name,
                             type: r.media_type === 'tv' ? 'series' : 'movie',
                             year: dateStr ? dateStr.split('-')[0] : 'N/A',
-                            poster: r.poster_path ? `${PROFILE_BASE_URL}${r.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster'
+                            rating: r.vote_average ? r.vote_average.toFixed(1) : null,
+                            overview: r.overview || 'No synopsis provided.',
+                            industryLabel: ind.label,
+                            poster: r.poster_path ? `${IMG_BASE_URL}${r.poster_path}` : 'https://placehold.co/120x180/1c1e2d/c4b5fd?text=No+Poster'
                         };
                     });
                 renderSearchResults(validResults, false);
             } catch (err) {
                 console.error("TMDB multi-search failed:", err);
-                resultsBox.innerHTML = `<div class="p-3 text-xs text-rose-400">Error searching TMDB. Check your API key in Settings.</div>`;
+                resultsBox.innerHTML = `<div class="p-3 text-xs text-rose-400">Error searching TMDB. Check your API key.</div>`;
             }
         }
 
@@ -793,31 +908,35 @@
 
             if (results.length === 0) {
                 resultsBox.innerHTML = `
-                    <div class="p-3 rounded-xl bg-surface-900 border border-white/10 text-xs text-gray-400">
-                        No matches found. ${isDemoSearch ? 'Connect your free TMDB API Key in Settings (gear icon) to search millions of titles live!' : ''}
+                    <div class="p-3.5 rounded-xl bg-surface-900 border border-white/10 text-xs text-gray-400">
+                        No matches found for that title. Try refining your keywords.
                     </div>
                 `;
                 return;
             }
 
             results.forEach(item => {
-                const row = document.createElement('button');
-                row.type = 'button';
+                const row = document.createElement('div');
                 row.onclick = () => selectSearchResult(item);
-                row.className = "w-full p-2 rounded-xl bg-surface-900 hover:bg-surface-700 border border-white/5 hover:border-violet-500/40 transition flex items-center gap-3 text-left group";
+                row.className = "w-full p-2.5 rounded-xl bg-surface-900 hover:bg-surface-800 border border-white/5 hover:border-violet-500/40 transition flex items-start gap-3 cursor-pointer group";
                 row.innerHTML = `
-                    <img src="${item.poster}" alt="${item.title}" class="w-10 h-14 object-cover rounded-lg bg-surface-800 flex-shrink-0">
+                    <img src="${item.poster}" alt="${item.title}" class="w-14 h-20 sm:w-16 sm:h-24 object-cover rounded-lg bg-surface-800 flex-shrink-0 shadow-md group-hover:scale-105 transition duration-300">
                     <div class="flex-1 min-w-0">
-                        <div class="text-xs font-semibold text-white group-hover:text-violet-300 truncate">${item.title}</div>
-                        <div class="text-[11px] text-gray-400 flex items-center gap-2 mt-0.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <h4 class="text-xs sm:text-sm font-semibold text-white group-hover:text-violet-300 truncate">${item.title}</h4>
+                            <span class="text-[11px] font-semibold text-emerald-400 px-2.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-black transition flex-shrink-0">
+                                Select
+                            </span>
+                        </div>
+                        <div class="text-[11px] text-gray-400 flex items-center gap-2 mt-1 flex-wrap">
                             <span class="uppercase font-bold text-[10px] px-1.5 py-0.2 rounded bg-white/5 text-violet-300">${item.type}</span>
                             <span>${item.year}</span>
+                            ${item.rating ? `<span class="text-amber-400 font-medium">★ ${item.rating}</span>` : ''}
+                            ${item.industryLabel ? `<span class="text-amber-300/80">${item.industryLabel}</span>` : ''}
                             <span class="font-mono text-gray-500">#${item.id}</span>
                         </div>
+                        <p class="text-[11px] text-gray-400 mt-1.5 line-clamp-2 leading-relaxed">${item.overview || ''}</p>
                     </div>
-                    <span class="text-[11px] font-semibold text-emerald-400 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-black transition">
-                        Select
-                    </span>
                 `;
                 resultsBox.appendChild(row);
             });
@@ -827,6 +946,18 @@
             document.getElementById('input-title').value = item.title;
             document.getElementById('input-tmdb-id').value = item.id;
             document.getElementById('input-type').value = item.type;
+            
+            // Populate Confirmation Preview Card
+            const previewCard = document.getElementById('selected-preview-card');
+            document.getElementById('preview-poster').src = item.poster;
+            document.getElementById('preview-title').textContent = item.title;
+            document.getElementById('preview-type-badge').textContent = (item.type || 'movie').toUpperCase();
+            document.getElementById('preview-year').textContent = item.year || '';
+            document.getElementById('preview-rating').textContent = item.rating ? `★ ${item.rating}` : '';
+            document.getElementById('preview-industry').textContent = item.industryLabel || 'Hollywood';
+            document.getElementById('preview-overview').textContent = item.overview || 'No synopsis available.';
+            previewCard.classList.remove('hidden');
+
             document.getElementById('tmdb-search-results').classList.add('hidden');
             document.getElementById('tmdb-search-query').value = '';
         }
@@ -844,6 +975,7 @@
             m.classList.remove('flex');
             document.getElementById('tmdb-search-results').classList.add('hidden');
             document.getElementById('tmdb-search-query').value = '';
+            document.getElementById('selected-preview-card').classList.add('hidden');
         }
 
         async function handleAddEntry(e) {
@@ -851,6 +983,11 @@
             const title = document.getElementById('input-title').value.trim();
             const tmdb_id = Number(document.getElementById('input-tmdb-id').value.trim());
             const type = document.getElementById('input-type').value;
+
+            if (!tmdb_id) {
+                showStatus("Please search and select a title from the list first to confirm details.");
+                return;
+            }
 
             // Check if already in list
             const existing = state.items.find(i => Number(i.tmdb_id) === tmdb_id || i.title.toLowerCase() === title.toLowerCase());
