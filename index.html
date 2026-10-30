@@ -252,8 +252,8 @@
                         </div>
                     </div>
 
-                    <!-- Rewatch Counter & Footer Actions -->
-                    <div class="mt-6 pt-4 border-t border-white/10 flex items-center justify-between">
+                    <!-- Rewatch Counter & Footer Actions with Delete Option -->
+                    <div class="mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
                         <div class="flex items-center gap-3">
                             <span class="text-xs text-gray-400">Rewatch Count:</span>
                             <div class="inline-flex items-center gap-2 bg-surface-900 px-2.5 py-1 rounded-lg border border-white/10">
@@ -262,7 +262,15 @@
                                 <button onclick="updateRewatch(1)" class="text-gray-400 hover:text-white font-bold px-1">+</button>
                             </div>
                         </div>
-                        <span id="modal-tmdb-id" class="text-[11px] text-gray-500 font-mono"></span>
+                        <div class="flex items-center gap-3">
+                            <button onclick="removeSelectedEntry()" class="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium transition flex items-center gap-1.5">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                </svg>
+                                <span>Remove</span>
+                            </button>
+                            <span id="modal-tmdb-id" class="text-[11px] text-gray-500 font-mono"></span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -634,7 +642,21 @@ function doPost(e) {
                 const json = await res.json();
                 const rawRows = json.data || [];
 
-                const enriched = await Promise.all(rawRows.map(async (row) => {
+                // Deduplicate incoming rows by tmdb_id or title, aggregating rewatch counts
+                const uniqueMap = new Map();
+                rawRows.forEach(row => {
+                    const key = row.tmdb_id ? String(row.tmdb_id) : (row.title || '').trim().toLowerCase();
+                    if (uniqueMap.has(key)) {
+                        const existing = uniqueMap.get(key);
+                        existing.rewatches = (Number(existing.rewatches) || 1) + (Number(row.rewatches) || 1);
+                    } else {
+                        uniqueMap.set(key, { ...row });
+                    }
+                });
+
+                const uniqueRows = Array.from(uniqueMap.values());
+
+                const enriched = await Promise.all(uniqueRows.map(async (row) => {
                     return await fetchTmdbDetailsAndCast(row);
                 }));
 
@@ -849,6 +871,15 @@ function doPost(e) {
 
         async function quickAddSimilar(sim) {
             closeDetailsModal();
+            // Check for duplicate before adding
+            const existing = state.items.find(i => Number(i.tmdb_id) === Number(sim.id));
+            if (existing) {
+                existing.rewatches = (existing.rewatches || 1) + 1;
+                renderAll();
+                showStatus(`"${sim.title}" is already in your watchlist! Increased rewatch count to ${existing.rewatches}.`);
+                return;
+            }
+
             showStatus(`Adding "${sim.title}" to watchlist...`);
             const newRaw = { title: sim.title, tmdb_id: sim.id, type: sim.type, rewatches: 1 };
             const enriched = await fetchTmdbDetailsAndCast(newRaw);
@@ -874,6 +905,38 @@ function doPost(e) {
             const modal = document.getElementById('details-modal');
             modal.classList.add('hidden');
             modal.classList.remove('flex');
+        }
+
+        async function removeSelectedEntry() {
+            if (state.selectedIndex === null) return;
+            const item = state.items[state.selectedIndex];
+            const title = item.title;
+            const tmdb_id = item.tmdb_id;
+
+            // Remove from local memory state
+            state.items.splice(state.selectedIndex, 1);
+            state.selectedIndex = null;
+            closeDetailsModal();
+
+            // Update local storage if in demo / offline mode
+            if (!state.sheetUrl || window.location.protocol === 'file:') {
+                localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
+            } else {
+                // Inform Google Sheet to delete row if supported by backend script
+                try {
+                    await fetch(state.sheetUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'delete', tmdb_id: tmdb_id, title: title })
+                    });
+                } catch (err) {
+                    console.error("Failed sending delete request:", err);
+                }
+            }
+
+            renderAll();
+            showStatus(`Removed "${title}" from your watchlist.`);
         }
 
         function updateRewatch(delta) {
@@ -1033,6 +1096,17 @@ function doPost(e) {
             const title = document.getElementById('input-title').value.trim();
             const tmdb_id = Number(document.getElementById('input-tmdb-id').value.trim());
             const type = document.getElementById('input-type').value;
+
+            // Check if already in list
+            const existing = state.items.find(i => Number(i.tmdb_id) === tmdb_id || i.title.toLowerCase() === title.toLowerCase());
+            if (existing) {
+                closeAddModal();
+                existing.rewatches = (existing.rewatches || 1) + 1;
+                renderAll();
+                showStatus(`"${title}" was already in your list! Incremented rewatch count to ${existing.rewatches} instead of creating a duplicate.`);
+                e.target.reset();
+                return;
+            }
 
             closeAddModal();
             showStatus(`Adding "${title}" to your watchlist...`);
