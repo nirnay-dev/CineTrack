@@ -128,6 +128,13 @@
                     <span>Surprise Me</span>
                 </button>
 
+                <button onclick="openFranchiseModal()" class="px-3.5 py-2 rounded-xl bg-surface-700 hover:bg-surface-600 text-gray-200 text-xs sm:text-sm font-medium flex items-center gap-1.5 border border-white/10 transition" title="Browse franchises like Marvel MCU, Batman, Star Wars & add in bulk">
+                    <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+                    </svg>
+                    <span>Franchises</span>
+                </button>
+
                 <button onclick="openAddModal()" class="px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-lg shadow-violet-600/25 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
@@ -163,19 +170,22 @@
 
                 <!-- Industry / Region Category Filter -->
                 <div class="inline-flex p-1 rounded-xl bg-surface-800 border border-white/5 overflow-x-auto">
-                    <button onclick="setIndustryFilter('all')" id="ind-all" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition bg-violet-600/30 text-violet-200 border border-violet-500/30">
+                    <button onclick="setIndustryFilter('all')" id="ind-all" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition bg-violet-600/30 text-violet-200 border border-violet-500/30 whitespace-nowrap">
                         All Industries
                     </button>
-                    <button onclick="setIndustryFilter('hollywood')" id="ind-hollywood" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white">
+                    <button onclick="setIndustryFilter('hollywood')" id="ind-hollywood" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap">
                         🎬 Hollywood
                     </button>
-                    <button onclick="setIndustryFilter('bollywood')" id="ind-bollywood" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white">
-                        🇮🇳 Bollywood / Indian
+                    <button onclick="setIndustryFilter('bollywood')" id="ind-bollywood" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap">
+                        🇮🇳 Bollywood
                     </button>
-                    <button onclick="setIndustryFilter('anime')" id="ind-anime" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white">
+                    <button onclick="setIndustryFilter('south')" id="ind-south" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap">
+                        🌴 South Indian
+                    </button>
+                    <button onclick="setIndustryFilter('anime')" id="ind-anime" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap">
                         🇯🇵 Anime / Japanese
                     </button>
-                    <button onclick="setIndustryFilter('kdrama')" id="ind-kdrama" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white">
+                    <button onclick="setIndustryFilter('kdrama')" id="ind-kdrama" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap">
                         🇰🇷 K-Drama / Korean
                     </button>
                 </div>
@@ -304,88 +314,139 @@
 
     <!-- Add Movie / Series Modal -->
     <div id="add-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 border border-white/15 max-h-[90vh] flex flex-col">
+        <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 border border-white/15 max-h-[90vh] flex flex-col overflow-y-auto">
             <div class="flex items-center justify-between mb-4">
                 <div>
                     <h3 class="font-display text-lg font-bold text-white">Search & Add to Watchlist</h3>
-                    <p class="text-xs text-gray-400">Search TMDB directly, review details & preview before confirming</p>
+                    <p class="text-xs text-gray-400">Search TMDB with real-time preview and poster confirmation</p>
                 </div>
-                <button onclick="closeAddModal()" class="text-gray-400 hover:text-white text-xl leading-none">&times;</button>
+                <button onclick="closeAddModal()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
             </div>
 
-            <div class="overflow-y-auto pr-1 flex-1 space-y-4">
-                <!-- Live TMDB Search Box -->
+            <!-- Live TMDB Search Box -->
+            <div class="mb-4">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-violet-400 mb-1.5">1. Search Movie or Series</label>
+                <div class="relative">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input 
+                        type="text" 
+                        id="tmdb-search-query" 
+                        oninput="debouncedTmdbSearch(this.value)"
+                        placeholder="Type title (e.g. Oppenheimer, Stranger Things, Jawan, Inception)..." 
+                        class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-900 border border-white/15 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
+                    >
+                </div>
+                <!-- Search Results Dropdown List -->
+                <div id="tmdb-search-results" class="mt-2 max-h-64 overflow-y-auto space-y-2 hidden pr-1">
+                    <!-- Dynamically populated search results -->
+                </div>
+            </div>
+
+            <!-- Selected Movie Confirmation Preview Box -->
+            <div id="add-preview-card" class="hidden mb-4 p-4 rounded-xl bg-surface-900/90 border border-violet-500/30 flex gap-4 items-center">
+                <img id="add-preview-poster" src="" alt="Poster" class="w-16 h-24 rounded-lg object-cover bg-surface-800 flex-shrink-0 border border-white/10">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <span id="add-preview-type" class="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-violet-500/20 text-violet-300">MOVIE</span>
+                        <span id="add-preview-year" class="text-xs text-gray-400">2024</span>
+                        <span id="add-preview-id" class="text-xs font-mono text-gray-500">#0</span>
+                    </div>
+                    <h4 id="add-preview-title" class="text-sm font-bold text-white mt-1 truncate">Selected Title</h4>
+                    <p id="add-preview-overview" class="text-xs text-gray-400 mt-1 line-clamp-2">Overview will appear here.</p>
+                </div>
+            </div>
+
+            <hr class="border-white/10 my-2">
+
+            <!-- Selected / Manual Entry Form -->
+            <form onsubmit="handleAddEntry(event)" class="space-y-4 pt-2">
+                <label class="block text-xs font-semibold uppercase tracking-wider text-emerald-400">2. Confirm Details</label>
                 <div>
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-violet-400 mb-1.5">1. Search Movie or Series</label>
-                    <div class="relative">
-                        <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                        </svg>
-                        <input 
-                            type="text" 
-                            id="tmdb-search-query" 
-                            oninput="debouncedTmdbSearch(this.value)"
-                            placeholder="Type a title (e.g. Oppenheimer, 3 Idiots, Arcane, Dune)..." 
-                            class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-900 border border-white/15 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
-                        >
+                    <label class="block text-xs font-medium text-gray-300 mb-1">Title</label>
+                    <input type="text" id="input-title" required placeholder="Select a title from search above or type here..." class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">TMDB ID</label>
+                        <input type="number" id="input-tmdb-id" required placeholder="Auto-filled ID" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white font-mono focus:outline-none focus:border-accent">
                     </div>
-                    <!-- Search Results Dropdown List (Expanded with larger posters & synopsis) -->
-                    <div id="tmdb-search-results" class="mt-2.5 max-h-64 overflow-y-auto space-y-2 hidden pr-1">
-                        <!-- Dynamically populated search results -->
+                    <div>
+                        <label class="block text-xs font-medium text-gray-300 mb-1">Type</label>
+                        <select id="input-type" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
+                            <option value="movie">Movie</option>
+                            <option value="series">Series (TV)</option>
+                        </select>
                     </div>
                 </div>
-
-                <hr class="border-white/10">
-
-                <!-- Selected Movie/Series Confirmation Preview Card -->
-                <div id="selected-preview-card" class="hidden p-3.5 rounded-xl bg-surface-900/90 border border-violet-500/40">
-                    <div class="flex gap-4">
-                        <img id="preview-poster" src="" alt="Poster" class="w-20 h-28 object-cover rounded-lg bg-surface-800 shadow-md flex-shrink-0">
-                        <div class="flex-1 min-w-0 flex flex-col justify-between">
-                            <div>
-                                <div class="flex items-center gap-2 flex-wrap">
-                                    <span id="preview-type-badge" class="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-violet-500/20 text-violet-300 border border-violet-500/30">MOVIE</span>
-                                    <span id="preview-year" class="text-xs text-gray-400 font-medium"></span>
-                                    <span id="preview-rating" class="text-xs text-amber-400 font-semibold flex items-center gap-1"></span>
-                                    <span id="preview-industry" class="text-[10px] font-bold px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30"></span>
-                                </div>
-                                <h4 id="preview-title" class="font-display font-bold text-base text-white mt-1"></h4>
-                                <p id="preview-overview" class="text-xs text-gray-300 mt-1 line-clamp-2 leading-relaxed"></p>
-                            </div>
-                            <span class="text-[11px] text-emerald-400 font-medium flex items-center gap-1 mt-1">
-                                ✓ Verified Selection Ready to Add
-                            </span>
-                        </div>
-                    </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-xl bg-surface-700 text-xs font-medium text-gray-300 hover:text-white">Cancel</button>
+                    <button type="submit" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white shadow-lg shadow-violet-600/25">Add to Watchlist & Sheet</button>
                 </div>
+            </form>
+        </div>
+    </div>
 
-                <!-- Selected / Form Details Confirmation -->
-                <form onsubmit="handleAddEntry(event)" class="space-y-3">
-                    <label class="block text-xs font-semibold uppercase tracking-wider text-emerald-400">2. Confirm & Add</label>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div class="sm:col-span-2">
-                            <label class="block text-xs font-medium text-gray-300 mb-1">Title</label>
-                            <input type="text" id="input-title" required placeholder="Select a title from search above..." class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
-                        </div>
-                        <div>
-                            <label class="block text-xs font-medium text-gray-300 mb-1">Type</label>
-                            <select id="input-type" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
-                                <option value="movie">Movie</option>
-                                <option value="series">Series (TV)</option>
-                            </select>
-                        </div>
-                    </div>
-                    <input type="hidden" id="input-tmdb-id" required>
-                    <div class="flex justify-end gap-2 pt-2">
-                        <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-xl bg-surface-700 text-xs font-medium text-gray-300">Cancel</button>
-                        <button type="submit" id="btn-submit-entry" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white shadow-lg shadow-violet-600/25 flex items-center gap-1.5">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
-                            </svg>
-                            <span>Add to Watchlist</span>
-                        </button>
-                    </div>
-                </form>
+    <!-- Franchise & Universe Batch Explorer Modal -->
+    <div id="franchise-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full max-w-4xl rounded-2xl p-6 border border-white/15 max-h-[90vh] flex flex-col">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="font-display text-lg font-bold text-white flex items-center gap-2">
+                        <span>Franchise & Universe Batch Explorer</span>
+                        <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Batch Add</span>
+                    </h3>
+                    <p class="text-xs text-gray-400">Select popular movie universes or search any franchise, check what you have watched, and add them all in one click</p>
+                </div>
+                <button onclick="closeFranchiseModal()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+            </div>
+
+            <!-- Universe Quick Preset Pills -->
+            <div class="flex flex-wrap items-center gap-2 mb-4">
+                <span class="text-xs text-gray-400 font-medium">Popular:</span>
+                <button type="button" onclick="loadUniverse('mcu')" class="px-3 py-1 rounded-lg text-xs font-medium bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600 hover:text-white transition">🦸 Marvel (MCU)</button>
+                <button type="button" onclick="loadUniverse('batman')" class="px-3 py-1 rounded-lg text-xs font-medium bg-sky-600/20 text-sky-300 border border-sky-500/30 hover:bg-sky-600 hover:text-white transition">🦇 Batman / DC</button>
+                <button type="button" onclick="loadUniverse('starwars')" class="px-3 py-1 rounded-lg text-xs font-medium bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600 hover:text-white transition">✨ Star Wars</button>
+                <button type="button" onclick="loadUniverse('harrypotter')" class="px-3 py-1 rounded-lg text-xs font-medium bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white transition">⚡ Harry Potter</button>
+                <button type="button" onclick="loadUniverse('lotr')" class="px-3 py-1 rounded-lg text-xs font-medium bg-yellow-600/20 text-yellow-300 border border-yellow-500/30 hover:bg-yellow-600 hover:text-white transition">💍 Lord of the Rings</button>
+                <button type="button" onclick="loadUniverse('fast')" class="px-3 py-1 rounded-lg text-xs font-medium bg-violet-600/20 text-violet-300 border border-violet-500/30 hover:bg-violet-600 hover:text-white transition">🏎️ Fast & Furious</button>
+            </div>
+
+            <!-- Search any other franchise -->
+            <div class="relative mb-4">
+                <input 
+                    type="text" 
+                    id="franchise-search-input" 
+                    placeholder="Or type any franchise / director (e.g., Mission Impossible, Spider-Man, Christopher Nolan, Pixar)..." 
+                    onkeydown="if(event.key === 'Enter') searchFranchiseCollection(this.value)"
+                    class="w-full pl-4 pr-24 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
+                >
+                <button 
+                    type="button" 
+                    onclick="searchFranchiseCollection(document.getElementById('franchise-search-input').value)" 
+                    class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-semibold transition"
+                >
+                    Search
+                </button>
+            </div>
+
+            <!-- Franchise Items Grid -->
+            <div id="franchise-results-container" class="flex-1 overflow-y-auto pr-1 min-h-[220px]">
+                <div class="text-center py-10 text-gray-500 text-xs">
+                    Choose a universe preset above or search any collection to view titles.
+                </div>
+            </div>
+
+            <!-- Franchise Bottom Action Bar -->
+            <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+                <div class="text-xs text-gray-400">
+                    Selected: <span id="franchise-selected-count" class="font-bold text-violet-400">0</span> unwatched titles to add
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeFranchiseModal()" class="px-4 py-2 rounded-xl bg-surface-700 text-xs font-medium text-gray-300 hover:text-white">Cancel</button>
+                    <button type="button" id="btn-batch-add" onclick="batchAddSelectedFranchise()" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white shadow-lg shadow-violet-600/25">Add Selected to Watchlist</button>
+                </div>
             </div>
         </div>
     </div>
@@ -400,11 +461,148 @@
 
     <script>
         // ============================================================================
-        // 2. STATE & CONFIGURATION (Hardcoded backend & API values)
+        // 1. DEFAULT DATASETS (Guarantees no undefined errors in local mode)
+        // ============================================================================
+        const DEMO_WATCHLIST = [
+            {
+                title: "Inception",
+                tmdb_id: 27205,
+                type: "movie",
+                industry: "hollywood",
+                industryLabel: "Hollywood",
+                rewatches: 3,
+                year: "2010",
+                runtime: 148,
+                poster: "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
+                overview: "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life.",
+                cast: [
+                    { name: "Leonardo DiCaprio", role: "Dom Cobb", photo: "https://image.tmdb.org/t/p/w185/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg" },
+                    { name: "Joseph Gordon-Levitt", role: "Arthur", photo: "https://image.tmdb.org/t/p/w185/z2FA8js799xqtfiFjBTicFYdfk.jpg" },
+                    { name: "Cillian Murphy", role: "Robert Fischer", photo: "https://image.tmdb.org/t/p/w185/dm6V24JJJVKB7qNv4T2Yq7N9J8N.jpg" }
+                ],
+                similar: []
+            },
+            {
+                title: "Interstellar",
+                tmdb_id: 157336,
+                type: "movie",
+                industry: "hollywood",
+                industryLabel: "Hollywood",
+                rewatches: 4,
+                year: "2014",
+                runtime: 169,
+                poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
+                overview: "A team of explorers travel through a wormhole in space in an attempt to ensure humanity's survival.",
+                cast: [
+                    { name: "Matthew McConaughey", role: "Cooper", photo: "https://image.tmdb.org/t/p/w185/e9ZHRY5toiBZCIPEEyvOG9A8ers.jpg" },
+                    { name: "Anne Hathaway", role: "Brand", photo: "https://image.tmdb.org/t/p/w185/s6tflSD20MGz04ZR2R1lZvhmC4Y.jpg" }
+                ],
+                similar: []
+            },
+            {
+                title: "Breaking Bad",
+                tmdb_id: 1396,
+                type: "series",
+                industry: "hollywood",
+                industryLabel: "Hollywood",
+                rewatches: 2,
+                year: "2008",
+                runtime: 450,
+                poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
+                overview: "A chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine.",
+                cast: [
+                    { name: "Bryan Cranston", role: "Walter White", photo: "https://image.tmdb.org/t/p/w185/7Jahy5LZX2Fo8fGJltMreAI49hC.jpg" },
+                    { name: "Aaron Paul", role: "Jesse Pinkman", photo: "https://image.tmdb.org/t/p/w185/8Ac9uuoYwZoYVAIJfRLzzLsGGJn.jpg" }
+                ],
+                similar: []
+            }
+        ];
+
+        const DEMO_SEARCH_CATALOG = [
+            {
+                title: "Oppenheimer",
+                tmdb_id: 872585,
+                type: "movie",
+                year: "2023",
+                runtime: 181,
+                poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
+                overview: "The story of J. Robert Oppenheimer's role in the development of the atomic bomb during World War II.",
+                cast: [{ name: "Cillian Murphy", role: "J. Robert Oppenheimer" }]
+            },
+            {
+                title: "Stranger Things",
+                tmdb_id: 66732,
+                type: "series",
+                year: "2016",
+                runtime: 340,
+                poster: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
+                overview: "A young boy vanishes, and a small town uncovers a mystery involving secret experiments and supernatural forces.",
+                cast: [{ name: "Millie Bobby Brown", role: "Eleven" }]
+            }
+        ];
+
+        // Built-in Franchise presets for 1-click exploration
+        const FRANCHISE_PRESETS = {
+            mcu: [
+                { id: 1726, title: "Iron Man", year: "2008", type: "movie", poster: "https://image.tmdb.org/t/p/w185/78lPtwv72eTNqFW9COBYI0dWDJa.jpg" },
+                { id: 1724, title: "The Incredible Hulk", year: "2008", type: "movie", poster: "https://image.tmdb.org/t/p/w185/gKzYx79y0AQTL4UAk1cBQJ3nvrm.jpg" },
+                { id: 10138, title: "Iron Man 2", year: "2010", type: "movie", poster: "https://image.tmdb.org/t/p/w185/6WBeq40ghMan4VZFFRzUv5j8y5D.jpg" },
+                { id: 10195, title: "Thor", year: "2011", type: "movie", poster: "https://image.tmdb.org/t/p/w185/prSfAi1xGrhLQNxVSUFh61xQ4Qx.jpg" },
+                { id: 1771, title: "Captain America: The First Avenger", year: "2011", type: "movie", poster: "https://image.tmdb.org/t/p/w185/vSNxAJTlD0r02V9sPYpqjqD4LJv.jpg" },
+                { id: 24428, title: "The Avengers", year: "2012", type: "movie", poster: "https://image.tmdb.org/t/p/w185/RYMX2wcKCBAr24UyPD7xwmjaTn.jpg" },
+                { id: 68721, title: "Iron Man 3", year: "2013", type: "movie", poster: "https://image.tmdb.org/t/p/w185/qhPtAc1TKbMPqNvcdXSOn9Bn7hZ.jpg" },
+                { id: 76338, title: "Thor: The Dark World", year: "2013", type: "movie", poster: "https://image.tmdb.org/t/p/w185/wp6OxE4poJ4G7c0U2ZIXasTSMR7.jpg" },
+                { id: 100402, title: "Captain America: The Winter Soldier", year: "2014", type: "movie", poster: "https://image.tmdb.org/t/p/w185/tVFRpFw3xTed5nGQqW0PUKHxW98.jpg" },
+                { id: 118340, title: "Guardians of the Galaxy", year: "2014", type: "movie", poster: "https://image.tmdb.org/t/p/w185/r2J02Z2OpNTctetGCSp57qSMBK3.jpg" },
+                { id: 99861, title: "Avengers: Age of Ultron", year: "2015", type: "movie", poster: "https://image.tmdb.org/t/p/w185/4ssDuvEDkS9NvmR19PJSl2on8bC.jpg" },
+                { id: 102899, title: "Ant-Man", year: "2015", type: "movie", poster: "https://image.tmdb.org/t/p/w185/8hP85y9pSgK5kY6bE1oZ4G9dE7w.jpg" },
+                { id: 271110, title: "Captain America: Civil War", year: "2016", type: "movie", poster: "https://image.tmdb.org/t/p/w185/rAGiXaUfPzY7CehyVXuTevencCe.jpg" },
+                { id: 284052, title: "Doctor Strange", year: "2016", type: "movie", poster: "https://image.tmdb.org/t/p/w185/uGBVj3bEbCoZbDjjl9wMgrghcyx.jpg" },
+                { id: 284053, title: "Thor: Ragnarok", year: "2017", type: "movie", poster: "https://image.tmdb.org/t/p/w185/rzRwTcFvttcN1ZpX2xv4jvoY0ND.jpg" },
+                { id: 284054, title: "Black Panther", year: "2018", type: "movie", poster: "https://image.tmdb.org/t/p/w185/uxzzxijgPIY7slzFvMotPv8vlum.jpg" },
+                { id: 299536, title: "Avengers: Infinity War", year: "2018", type: "movie", poster: "https://image.tmdb.org/t/p/w185/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg" },
+                { id: 299534, title: "Avengers: Endgame", year: "2019", type: "movie", poster: "https://image.tmdb.org/t/p/w185/or06FN3Dka5tukK1e9sl16pB3iy.jpg" },
+                { id: 533535, title: "Deadpool & Wolverine", year: "2024", type: "movie", poster: "https://image.tmdb.org/t/p/w185/8cdWjvZQUExUUTzyp4tmnEdMubf.jpg" }
+            ],
+            batman: [
+                { id: 272, title: "Batman Begins", year: "2005", type: "movie", poster: "https://image.tmdb.org/t/p/w185/4MpN4CwhvuaYrSpAQK7RMycShYq.jpg" },
+                { id: 155, title: "The Dark Knight", year: "2008", type: "movie", poster: "https://image.tmdb.org/t/p/w185/qJ2tW6WMUDux911r6m7haRef0WH.jpg" },
+                { id: 49026, title: "The Dark Knight Rises", year: "2012", type: "movie", poster: "https://image.tmdb.org/t/p/w185/hrJUZvY8bX9QWqYwz7RkGZ0bU4U.jpg" },
+                { id: 414906, title: "The Batman", year: "2022", type: "movie", poster: "https://image.tmdb.org/t/p/w185/74xTEgt7R36Fpooo50r9T25onhq.jpg" }
+            ],
+            starwars: [
+                { id: 11, title: "Star Wars: A New Hope", year: "1977", type: "movie", poster: "https://image.tmdb.org/t/p/w185/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg" },
+                { id: 1891, title: "The Empire Strikes Back", year: "1980", type: "movie", poster: "https://image.tmdb.org/t/p/w185/nNAeTmF4CtdSgIOIZCbBp9yVmg5.jpg" },
+                { id: 1892, title: "Return of the Jedi", year: "1983", type: "movie", poster: "https://image.tmdb.org/t/p/w185/mDCBQNhR6R0PVXzB5gqO6kM4M9L.jpg" },
+                { id: 140607, title: "The Force Awakens", year: "2015", type: "movie", poster: "https://image.tmdb.org/t/p/w185/wqnLdwVXo5q8hamFi9Urj9x0Gt5.jpg" }
+            ],
+            harrypotter: [
+                { id: 671, title: "Harry Potter and the Philosopher's Stone", year: "2001", type: "movie", poster: "https://image.tmdb.org/t/p/w185/wuMc08IPKEatf9rnMNXvIDxqP4W.jpg" },
+                { id: 672, title: "Harry Potter and the Chamber of Secrets", year: "2002", type: "movie", poster: "https://image.tmdb.org/t/p/w185/sdEOH0992YZ02ioWT5AFRR9GIY2.jpg" },
+                { id: 673, title: "Harry Potter and the Prisoner of Azkaban", year: "2004", type: "movie", poster: "https://image.tmdb.org/t/p/w185/aWxwnYoe8p2d2fcxOqtvAtI72Rw.jpg" },
+                { id: 12445, title: "Harry Potter and the Deathly Hallows: Part 2", year: "2011", type: "movie", poster: "https://image.tmdb.org/t/p/w185/c54HpQmuwXjHq2C9w82z5uG8d2m.jpg" }
+            ],
+            lotr: [
+                { id: 120, title: "The Fellowship of the Ring", year: "2001", type: "movie", poster: "https://image.tmdb.org/t/p/w185/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg" },
+                { id: 121, title: "The Two Towers", year: "2002", type: "movie", poster: "https://image.tmdb.org/t/p/w185/rrGlNlzFTrXFNGHyo7JLVukC6bp.jpg" },
+                { id: 122, title: "The Return of the King", year: "2003", type: "movie", poster: "https://image.tmdb.org/t/p/w185/rCzpDGLbOoPwLjy3OAm5NUPOTrC.jpg" }
+            ],
+            fast: [
+                { id: 9799, title: "The Fast and the Furious", year: "2001", type: "movie", poster: "https://image.tmdb.org/t/p/w185/gq5WiO9Cf8A4700UNqegSM4uq7L.jpg" },
+                { id: 51497, title: "Fast Five", year: "2011", type: "movie", poster: "https://image.tmdb.org/t/p/w185/v3GgA0VnNqD3xUu7z9F3yYwXq2q.jpg" },
+                { id: 168259, title: "Furious 7", year: "2015", type: "movie", poster: "https://image.tmdb.org/t/p/w185/ktoppR0m2Wd2A5P9kO5q1m4N8h0.jpg" }
+            ]
+        };
+
+        // ============================================================================
+        // 2. STATE & CONFIGURATION
         // ============================================================================
         const DEFAULT_TMDB_KEY = "94aec3d2bafb2bc5e0bb42a917ad8dac";
         const DEFAULT_SHEET_URL = "https://script.google.com/macros/s/AKfycbz8eCMRt086alMQvf81QrxDBu3qU76sDEloHrbi4ZA4nVWMmQTBOLRLk4n7nXFihNUn/exec";
 
+        // Primary and backup TMDB API hosts (api.tmdb.org bypasses ISP blocks that affect api.themoviedb.org)
+        const TMDB_PRIMARY_HOST = "https://api.tmdb.org/3";
+        const TMDB_BACKUP_HOST = "https://api.themoviedb.org/3";
         const IMG_BASE_URL = "https://image.tmdb.org/t/p/w500";
         const PROFILE_BASE_URL = "https://image.tmdb.org/t/p/w185";
         let state = {
@@ -414,54 +612,420 @@
             searchQuery: '',
             selectedIndex: null,
             tmdbKey: DEFAULT_TMDB_KEY,
-            sheetUrl: DEFAULT_SHEET_URL
+            sheetUrl: DEFAULT_SHEET_URL,
+            franchiseItems: [],
+            selectedFranchiseIds: new Set()
         };
 
-        // Helper to determine industry/region based on original language & country
-        function detectIndustry(lang = '', country = '') {
-            const l = (lang || '').toLowerCase();
-            const c = (country || '').toUpperCase();
+        // Resilient TMDB fetcher that tries both api.tmdb.org and api.themoviedb.org
+        async function fetchTmdbApi(pathWithQuery) {
+            const separator = pathWithQuery.includes('?') ? '&' : '?';
+            const fullQuery = `${pathWithQuery}${separator}api_key=${state.tmdbKey}`;
+            
+            // Try primary endpoint (api.tmdb.org)
+            try {
+                const res = await fetch(`${TMDB_PRIMARY_HOST}${fullQuery}`);
+                if (res.ok) return await res.json();
+            } catch (err) {
+                // Primary failed (network error, timeout, or blocked)
+            }
 
-            // Indian Cinema: Hindi, Telugu, Tamil, Malayalam, Kannada, Punjabi, Bengali, Marathi, Gujarati
-            if (['hi', 'te', 'ta', 'ml', 'kn', 'pa', 'bn', 'mr', 'gu'].includes(l) || c === 'IN') {
-                return { key: 'bollywood', label: 'Bollywood / Indian' };
+            // Fallback to secondary endpoint (api.themoviedb.org)
+            try {
+                const res = await fetch(`${TMDB_BACKUP_HOST}${fullQuery}`);
+                if (res.ok) return await res.json();
+            } catch (err) {
+                // Both failed
             }
-            // Japanese / Anime
-            if (l === 'ja' || c === 'JP') {
-                return { key: 'anime', label: 'Anime / Japanese' };
-            }
-            // Korean / K-Drama
-            if (l === 'ko' || c === 'KR') {
-                return { key: 'kdrama', label: 'K-Drama / Korean' };
-            }
-            // Hollywood & Western International
-            if (l === 'en' || ['US', 'GB', 'CA', 'AU'].includes(c)) {
-                return { key: 'hollywood', label: 'Hollywood' };
-            }
-            return { key: 'world', label: 'World Cinema' };
+
+            return null;
         }
 
-        // Helper to generate SVG initials avatar fallback when an actor photo fails to load
         function getAvatarFallback(name) {
             const encoded = encodeURIComponent(name || 'Actor');
             return `https://placehold.co/185x185/1c1e2d/c4b5fd?text=${encoded}`;
         }
 
-        // ============================================================================
-        // 3. DATA FETCHING (Live Google Sheet + TMDB Credits)
-        // ============================================================================
+        function detectIndustry(lang, country) {
+            // South Indian Cinema: Telugu, Tamil, Malayalam, Kannada
+            const southLanguages = ['te', 'ta', 'ml', 'kn'];
+            if (southLanguages.includes(lang)) {
+                return { key: 'south', label: 'South Indian' };
+            }
+
+            // Bollywood / Hindi & Other North/Central Indian Cinema
+            const bollywoodLanguages = ['hi', 'pa', 'gu', 'mr', 'bn', 'ur'];
+            if (bollywoodLanguages.includes(lang) || country === 'IN') {
+                return { key: 'bollywood', label: 'Bollywood' };
+            }
+
+            if (country === 'JP' || lang === 'ja') {
+                return { key: 'anime', label: 'Anime / Japanese' };
+            }
+            if (country === 'KR' || lang === 'ko') {
+                return { key: 'kdrama', label: 'K-Drama / Korean' };
+            }
+            return { key: 'hollywood', label: 'Hollywood' };
+        }
+
         async function initApp() {
             const badge = document.getElementById('mode-badge');
-            if (state.sheetUrl) {
+            if (badge) {
                 badge.textContent = "Live Synced";
                 badge.className = "text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
-                await loadFromGoogleSheet();
+            }
+            await loadFromGoogleSheet();
+        }
+
+        // Safe Modal Opening and Details Rendering (Prevents setting property of null)
+        function openDetailsModal(index) {
+            state.selectedIndex = index;
+            const item = state.items[index];
+            if (!item) return;
+
+            const modal = document.getElementById('details-modal');
+            if (!modal) return;
+
+            const setElText = (id, val) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = val;
+            };
+
+            const posterEl = document.getElementById('modal-poster');
+            if (posterEl) {
+                posterEl.src = item.poster || 'https://placehold.co/300x450/1c1e2d/c4b5fd?text=No+Poster';
+                posterEl.alt = item.title || 'Movie';
+            }
+
+            setElText('modal-type', (item.type || 'movie').toUpperCase());
+            setElText('modal-industry', (item.industryLabel || 'Hollywood').toUpperCase());
+            setElText('modal-title', item.title || 'Untitled');
+            setElText('modal-meta', `${item.year || ''} • ~${item.runtime || 120} mins`);
+            setElText('modal-overview', item.overview || 'No description available.');
+            setElText('modal-rewatch', item.rewatches || 1);
+            setElText('modal-tmdb-id', `TMDB #${item.tmdb_id || ''}`);
+
+            const castContainer = document.getElementById('modal-cast');
+            if (castContainer) {
+                castContainer.innerHTML = '';
+                (item.cast || []).forEach(actor => {
+                    const avatarSrc = actor.photo || getAvatarFallback(actor.name);
+                    const fallbackUrl = getAvatarFallback(actor.name);
+                    const card = document.createElement('button');
+                    card.type = 'button';
+                    card.onclick = () => filterByActor(actor.name);
+                    card.className = "group/actor flex-shrink-0 w-24 sm:w-28 snap-start bg-surface-900/90 hover:bg-surface-700/80 p-2.5 rounded-xl border border-white/5 hover:border-violet-500/40 transition flex flex-col items-center text-center";
+                    card.title = `Filter watchlist by ${actor.name}`;
+                    card.innerHTML = `
+                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-surface-800 border-2 border-white/10 group-hover/actor:border-violet-400 transition shadow-md mb-2">
+                            <img 
+                                src="${avatarSrc}" 
+                                alt="${actor.name}" 
+                                onerror="this.onerror=null;this.src='${fallbackUrl}';"
+                                class="w-full h-full object-cover group-hover/actor:scale-105 transition duration-300"
+                            >
+                        </div>
+                        <span class="text-xs font-semibold text-white group-hover/actor:text-violet-300 transition line-clamp-1 w-full">${actor.name}</span>
+                        <span class="text-[11px] text-gray-400 line-clamp-1 w-full mt-0.5">${actor.role || 'Cast'}</span>
+                    `;
+                    castContainer.appendChild(card);
+                });
+            }
+
+            const recContainer = document.getElementById('modal-recommendations');
+            if (recContainer) {
+                recContainer.innerHTML = '';
+                const sims = item.similar && item.similar.length > 0 ? item.similar : [
+                    { id: 603, title: "The Matrix", type: "movie", poster: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg" },
+                    { id: 872585, title: "Oppenheimer", type: "movie", poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" }
+                ];
+
+                sims.forEach(sim => {
+                    const simCard = document.createElement('div');
+                    simCard.className = "flex-shrink-0 w-28 bg-surface-900/90 rounded-xl overflow-hidden border border-white/5 p-2 flex flex-col justify-between group/sim";
+                    simCard.innerHTML = `
+                        <div>
+                            <div class="aspect-[2/3] w-full rounded-lg overflow-hidden bg-surface-800 mb-1.5">
+                                <img src="${sim.poster}" alt="${sim.title}" class="w-full h-full object-cover group-hover/sim:scale-105 transition">
+                            </div>
+                            <h4 class="text-[11px] font-medium text-white truncate">${sim.title}</h4>
+                        </div>
+                        <button type="button" onclick='quickAddSimilar(${JSON.stringify(sim).replace(/'/g, "&apos;")})' class="mt-2 w-full py-1 rounded bg-violet-600/20 hover:bg-violet-600 text-violet-300 hover:text-white text-[10px] font-semibold transition border border-violet-500/30">
+                            + Add
+                        </button>
+                    `;
+                    recContainer.appendChild(simCard);
+                });
+            }
+
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+        }
+
+        function pickRandomWatched() {
+            if (!state.items || state.items.length === 0) {
+                showStatus("Your watchlist is empty right now. Add a movie or series first!");
+                return;
+            }
+            const randomIndex = Math.floor(Math.random() * state.items.length);
+            openDetailsModal(randomIndex);
+        }
+
+        // Add Modal Open & Close with safe element retrieval
+        function openAddModal() {
+            const m = document.getElementById('add-modal');
+            if (!m) return;
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            const searchInput = document.getElementById('tmdb-search-query');
+            if (searchInput) {
+                setTimeout(() => searchInput.focus(), 60);
+            }
+        }
+
+        function closeAddModal() {
+            const m = document.getElementById('add-modal');
+            if (!m) return;
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+            const results = document.getElementById('tmdb-search-results');
+            if (results) results.classList.add('hidden');
+            const previewCard = document.getElementById('add-preview-card');
+            if (previewCard) previewCard.classList.add('hidden');
+            const searchInput = document.getElementById('tmdb-search-query');
+            if (searchInput) searchInput.value = '';
+        }
+
+        // ============================================================================
+        // FRANCHISE EXPLORER MODAL & BATCH ADDING
+        // ============================================================================
+        function openFranchiseModal() {
+            const m = document.getElementById('franchise-modal');
+            if (!m) return;
+            m.classList.remove('hidden');
+            m.classList.add('flex');
+            if (!state.franchiseItems || state.franchiseItems.length === 0) {
+                loadUniverse('mcu');
+            }
+        }
+
+        function closeFranchiseModal() {
+            const m = document.getElementById('franchise-modal');
+            if (!m) return;
+            m.classList.add('hidden');
+            m.classList.remove('flex');
+        }
+
+        function loadUniverse(key) {
+            const list = FRANCHISE_PRESETS[key] || [];
+            state.franchiseItems = [...list];
+            state.selectedFranchiseIds.clear();
+            renderFranchiseGrid();
+        }
+
+        async function searchFranchiseCollection(query) {
+            if (!query || query.trim().length < 2) return;
+            const container = document.getElementById('franchise-results-container');
+            if (container) {
+                container.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs">Searching franchise collections for "${query}"...</div>`;
+            }
+
+            try {
+                // Search collections with resilient fetcher
+                const data = await fetchTmdbApi(`/search/collection?query=${encodeURIComponent(query)}`);
+                
+                if (data && data.results && data.results.length > 0) {
+                    const collectionId = data.results[0].id;
+                    const colData = await fetchTmdbApi(`/collection/${collectionId}`);
+                    
+                    if (colData && colData.parts) {
+                        state.franchiseItems = colData.parts.map(p => ({
+                            id: p.id,
+                            title: p.title,
+                            type: 'movie',
+                            year: (p.release_date || '').split('-')[0] || 'N/A',
+                            poster: p.poster_path ? `${PROFILE_BASE_URL}${p.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster'
+                        })).sort((a,b) => (a.year > b.year ? 1 : -1));
+                    }
+                } else {
+                    // Fallback to multi-search
+                    const mData = await fetchTmdbApi(`/search/multi?query=${encodeURIComponent(query)}`);
+                    state.franchiseItems = (mData && mData.results ? mData.results : [])
+                        .filter(r => r.media_type === 'movie' || r.media_type === 'tv')
+                        .map(r => ({
+                            id: r.id,
+                            title: r.title || r.name,
+                            type: r.media_type === 'tv' ? 'series' : 'movie',
+                            year: (r.release_date || r.first_air_date || '').split('-')[0] || 'N/A',
+                            poster: r.poster_path ? `${PROFILE_BASE_URL}${r.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster'
+                        }));
+                }
+                state.selectedFranchiseIds.clear();
+                renderFranchiseGrid();
+            } catch (err) {
+                console.error("Franchise search error:", err);
+                if (container) {
+                    container.innerHTML = `<div class="text-center py-10 text-rose-400 text-xs">Error fetching collection from TMDB. Try choosing one of the preset universe buttons.</div>`;
+                }
+            }
+        }
+
+        function renderFranchiseGrid() {
+            const container = document.getElementById('franchise-results-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            if (state.franchiseItems.length === 0) {
+                container.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs">No movies found in this franchise.</div>`;
+                updateFranchiseCount();
+                return;
+            }
+
+            const grid = document.createElement('div');
+            grid.className = "grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3";
+
+            state.franchiseItems.forEach(item => {
+                const isAlreadyWatched = state.items.some(i => Number(i.tmdb_id) === Number(item.id));
+                const isSelected = state.selectedFranchiseIds.has(item.id);
+
+                const card = document.createElement('div');
+                card.className = `p-2 rounded-xl border transition flex flex-col justify-between cursor-pointer ${
+                    isAlreadyWatched 
+                        ? 'bg-emerald-950/20 border-emerald-500/30 opacity-80 cursor-default' 
+                        : isSelected 
+                            ? 'bg-violet-950/40 border-violet-500 ring-2 ring-violet-500/50' 
+                            : 'bg-surface-900 border-white/5 hover:border-white/20'
+                }`;
+
+                if (!isAlreadyWatched) {
+                    card.onclick = () => toggleFranchiseItem(item.id);
+                }
+
+                card.innerHTML = `
+                    <div class="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-surface-800 mb-2">
+                        <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover">
+                        ${isAlreadyWatched ? `
+                            <span class="absolute top-1.5 right-1.5 px-2 py-0.5 rounded bg-emerald-500 text-black font-bold text-[10px] shadow">
+                                ✓ Watched
+                            </span>
+                        ` : `
+                            <div class="absolute top-1.5 right-1.5 w-5 h-5 rounded-md border flex items-center justify-center ${isSelected ? 'bg-violet-600 border-violet-400 text-white' : 'bg-black/60 border-white/30 text-transparent'}">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                            </div>
+                        `}
+                    </div>
+                    <div>
+                        <h4 class="text-xs font-semibold text-white truncate">${item.title}</h4>
+                        <div class="flex items-center justify-between text-[10px] text-gray-400 mt-0.5">
+                            <span class="uppercase">${item.type}</span>
+                            <span>${item.year}</span>
+                        </div>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+
+            container.appendChild(grid);
+            updateFranchiseCount();
+        }
+
+        function toggleFranchiseItem(id) {
+            if (state.selectedFranchiseIds.has(id)) {
+                state.selectedFranchiseIds.delete(id);
             } else {
-                badge.textContent = "Local Mode";
-                badge.className = "text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30";
-                const savedDemo = localStorage.getItem('cinetrack_demo_items');
-                state.items = savedDemo ? JSON.parse(savedDemo) : [...DEMO_WATCHLIST];
-                renderAll();
+                state.selectedFranchiseIds.add(id);
+            }
+            renderFranchiseGrid();
+        }
+
+        function updateFranchiseCount() {
+            const countEl = document.getElementById('franchise-selected-count');
+            if (countEl) countEl.textContent = state.selectedFranchiseIds.size;
+            const btn = document.getElementById('btn-batch-add');
+            if (btn) {
+                btn.textContent = state.selectedFranchiseIds.size > 0 
+                    ? `Add Selected (${state.selectedFranchiseIds.size}) to Watchlist` 
+                    : 'Add Selected to Watchlist';
+            }
+        }
+
+        async function batchAddSelectedFranchise() {
+            if (state.selectedFranchiseIds.size === 0) {
+                showStatus("Please click to select at least one movie from the franchise.");
+                return;
+            }
+
+            const toAdd = state.franchiseItems.filter(i => state.selectedFranchiseIds.has(i.id));
+            closeFranchiseModal();
+            showStatus(`Batch adding ${toAdd.length} movies to your watchlist & Google Sheet...`);
+
+            for (const item of toAdd) {
+                const rawEntry = { title: item.title, tmdb_id: item.id, type: item.type, rewatches: 1 };
+                
+                // Append each to Google Sheet
+                if (state.sheetUrl) {
+                    try {
+                        await fetch(state.sheetUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(rawEntry)
+                        });
+                    } catch (err) {
+                        console.error("Batch post error:", err);
+                    }
+                }
+
+                const enriched = await fetchTmdbDetailsAndCast(rawEntry);
+                if (enriched) {
+                    state.items.unshift(enriched);
+                }
+            }
+
+            if (!state.sheetUrl || window.location.protocol === 'file:') {
+                localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
+            }
+
+            renderAll();
+            showStatus(`Successfully batch added ${toAdd.length} movies!`);
+        }
+
+        // Enhanced Selection with Live Confirmation Preview Card
+        function selectSearchResult(item) {
+            const titleInput = document.getElementById('input-title');
+            const idInput = document.getElementById('input-tmdb-id');
+            const typeInput = document.getElementById('input-type');
+
+            if (titleInput) titleInput.value = item.title;
+            if (idInput) idInput.value = item.id;
+            if (typeInput) typeInput.value = item.type;
+
+            const resultsBox = document.getElementById('tmdb-search-results');
+            if (resultsBox) resultsBox.classList.add('hidden');
+
+            const searchInput = document.getElementById('tmdb-search-query');
+            if (searchInput) searchInput.value = '';
+
+            // Show confirmation preview card
+            const previewCard = document.getElementById('add-preview-card');
+            if (previewCard) {
+                const poster = document.getElementById('add-preview-poster');
+                const pTitle = document.getElementById('add-preview-title');
+                const pType = document.getElementById('add-preview-type');
+                const pYear = document.getElementById('add-preview-year');
+                const pId = document.getElementById('add-preview-id');
+                const pOverview = document.getElementById('add-preview-overview');
+
+                if (poster) poster.src = item.poster || 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster';
+                if (pTitle) pTitle.textContent = item.title;
+                if (pType) pType.textContent = (item.type || 'movie').toUpperCase();
+                if (pYear) pYear.textContent = item.year || 'N/A';
+                if (pId) pId.textContent = `#${item.id}`;
+                if (pOverview) pOverview.textContent = item.overview || 'Ready to add to your watchlist.';
+
+                previewCard.classList.remove('hidden');
             }
         }
 
@@ -485,7 +1049,6 @@
                 });
 
                 const uniqueRows = Array.from(uniqueMap.values());
-
                 const enriched = await Promise.all(uniqueRows.map(async (row) => {
                     return await fetchTmdbDetailsAndCast(row);
                 }));
@@ -496,41 +1059,19 @@
             } catch (err) {
                 console.error("Sheet sync error:", err);
                 showStatus("Could not reach Google Sheet URL. Showing cached/demo entries instead.");
-                const savedDemo = localStorage.getItem('cinetrack_demo_items');
-                state.items = savedDemo ? JSON.parse(savedDemo) : [...DEMO_WATCHLIST];
+                state.items = [...DEMO_WATCHLIST];
                 renderAll();
             }
         }
 
-        // Uses TMDB append_to_response=credits to get Poster, Details & Cast in ONE single free request
         async function fetchTmdbDetailsAndCast(item) {
-            if (!state.tmdbKey) {
-                const matchDemo = [...DEMO_WATCHLIST, ...DEMO_SEARCH_CATALOG].find(
-                    d => Number(d.tmdb_id) === Number(item.tmdb_id) || d.title.toLowerCase() === (item.title || '').toLowerCase()
-                );
-                if (matchDemo) {
-                    return { ...matchDemo, rewatches: Number(item.rewatches || 1) };
-                }
-                return {
-                    title: item.title,
-                    tmdb_id: item.tmdb_id,
-                    type: item.type || 'movie',
-                    rewatches: item.rewatches || 1,
-                    year: "Added",
-                    runtime: item.type === 'series' ? 240 : 120,
-                    poster: "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=80",
-                    overview: "Connect your TMDB key to fetch live description.",
-                    cast: [{ name: "Cast Member", role: "Role", photo: "https://image.tmdb.org/t/p/w185/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg" }],
-                    similar: []
-                };
-            }
-
             const endpoint = (item.type || '').toLowerCase() === 'series' ? 'tv' : 'movie';
-            const url = `https://api.themoviedb.org/3/${endpoint}/${item.tmdb_id}?api_key=${state.tmdbKey}&append_to_response=credits,similar`;
+            const path = `/${endpoint}/${item.tmdb_id}?append_to_response=credits,similar`;
 
             try {
-                const response = await fetch(url);
-                const data = await response.json();
+                const data = await fetchTmdbApi(path);
+                if (!data) throw new Error("TMDB unreachable");
+
                 const topCast = (data.credits && data.credits.cast ? data.credits.cast.slice(0, 10) : []).map(c => ({
                     name: c.name,
                     role: c.character || 'Cast',
@@ -558,22 +1099,40 @@
                     rewatches: Number(item.rewatches || 1),
                     year: releaseDate ? releaseDate.split('-')[0] : 'N/A',
                     runtime: data.runtime || (endpoint === 'tv' ? 300 : 120),
-                    poster: data.poster_path ? `${IMG_BASE_URL}${data.poster_path}` : "https://images.unsplash.com/photo-1489599849927-2ee91cede3ba?auto=format&fit=crop&w=500&q=80",
+                    poster: data.poster_path ? `${IMG_BASE_URL}${data.poster_path}` : "https://placehold.co/500x750/1c1e2d/c4b5fd?text=No+Poster",
                     overview: data.overview || "No description available.",
                     cast: topCast,
                     similar: similarList
                 };
             } catch (error) {
-                console.error("TMDB error:", error);
+                // Check if demo catalog contains it
                 const matchDemo = [...DEMO_WATCHLIST, ...DEMO_SEARCH_CATALOG].find(
                     d => Number(d.tmdb_id) === Number(item.tmdb_id)
                 );
-                return matchDemo ? { ...matchDemo, rewatches: Number(item.rewatches || 1) } : null;
+                if (matchDemo) {
+                    return { ...matchDemo, rewatches: Number(item.rewatches || 1) };
+                }
+
+                // Graceful fallback row so application doesn't fail to load
+                return {
+                    title: item.title || `Title #${item.tmdb_id}`,
+                    tmdb_id: item.tmdb_id,
+                    type: item.type || 'movie',
+                    industry: 'hollywood',
+                    industryLabel: 'Hollywood',
+                    rewatches: Number(item.rewatches || 1),
+                    year: 'N/A',
+                    runtime: item.type === 'series' ? 240 : 120,
+                    poster: 'https://placehold.co/500x750/1c1e2d/c4b5fd?text=' + encodeURIComponent(item.title || 'Movie'),
+                    overview: 'Unable to reach TMDB. Check connection or DNS.',
+                    cast: [],
+                    similar: []
+                };
             }
         }
 
         // ============================================================================
-        // 4. MINIMALIST CARD RENDERING & STATS
+        // 3. CARD RENDERING & STATS
         // ============================================================================
         function renderAll() {
             updateStats();
@@ -603,7 +1162,6 @@
                 card.className = "poster-card group cursor-pointer rounded-2xl bg-surface-800 overflow-hidden border border-white/5 flex flex-col";
                 card.onclick = () => openDetailsModal(originalIndex);
 
-                // Minimalist front view: Poster + Title + Subtle Industry & Rewatch Badges
                 card.innerHTML = `
                     <div class="relative aspect-[2/3] w-full bg-surface-900 overflow-hidden">
                         <img src="${item.poster}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
@@ -614,7 +1172,7 @@
                         </div>
                         <div class="absolute top-2.5 left-2.5">
                             <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/75 text-amber-300 border border-amber-500/30 backdrop-blur-md">
-                                ${item.industry === 'bollywood' ? '🇮🇳 Bollywood' : item.industry === 'anime' ? '🇯🇵 Anime' : item.industry === 'kdrama' ? '🇰🇷 K-Drama' : 'Hollywood'}
+                                ${item.industry === 'south' ? '🌴 South Indian' : item.industry === 'bollywood' ? '🇮🇳 Bollywood' : item.industry === 'anime' ? '🇯🇵 Anime' : item.industry === 'kdrama' ? '🇰🇷 K-Drama' : 'Hollywood'}
                             </span>
                         </div>
                         ${item.rewatches > 1 ? `
@@ -642,86 +1200,100 @@
         }
 
         // ============================================================================
-        // 5. INTERACTIVE FEATURES (Cast Modal, Random Picker, Filters, Add Entry)
+        // 4. ACTION BUTTON HANDLERS (Surprise Me, Add Entry, Franchise Explorer)
         // ============================================================================
-        function openDetailsModal(index) {
-            state.selectedIndex = index;
-            const item = state.items[index];
-            if (!item) return;
+        function setFilter(type) {
+            state.activeFilter = type;
+            ['all', 'movie', 'series'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (btn) {
+                    if (t === type) {
+                        btn.className = "filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white";
+                    } else {
+                        btn.className = "filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white";
+                    }
+                }
+            });
+            renderAll();
+        }
 
-            document.getElementById('modal-poster').src = item.poster;
-            document.getElementById('modal-poster').alt = item.title;
-            document.getElementById('modal-type').textContent = item.type.toUpperCase();
-            
-            const modalIndustry = document.getElementById('modal-industry');
-            if (modalIndustry) {
-                modalIndustry.textContent = (item.industryLabel || 'Hollywood').toUpperCase();
+        function setIndustryFilter(industry) {
+            state.activeIndustry = industry;
+            ['all', 'hollywood', 'bollywood', 'south', 'anime', 'kdrama'].forEach(ind => {
+                const btn = document.getElementById(`ind-${ind}`);
+                if (!btn) return;
+                if (ind === industry) {
+                    btn.className = "ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition bg-violet-600/30 text-violet-200 border border-violet-500/30 whitespace-nowrap";
+                } else {
+                    btn.className = "ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap";
+                }
+            });
+            renderAll();
+        }
+        async function batchAddSelectedFranchise() {
+            if (state.selectedFranchiseIds.size === 0) {
+                showStatus("Please click to select at least one movie from the franchise.");
+                return;
             }
 
-            document.getElementById('modal-title').textContent = item.title;
-            document.getElementById('modal-meta').textContent = `${item.year || ''} • ~${item.runtime || 120} mins`;
-            document.getElementById('modal-overview').textContent = item.overview || '';
-            document.getElementById('modal-rewatch').textContent = item.rewatches || 1;
-            document.getElementById('modal-tmdb-id').textContent = `TMDB #${item.tmdb_id}`;
+            const toAdd = state.franchiseItems.filter(i => state.selectedFranchiseIds.has(i.id));
+            // Clear selections immediately so subsequent searches start fresh
+            state.selectedFranchiseIds.clear();
+            updateFranchiseCount();
+            closeFranchiseModal();
+            showStatus(`Batch adding ${toAdd.length} movies to your watchlist & Google Sheet...`);
 
-            const castContainer = document.getElementById('modal-cast');
-            castContainer.innerHTML = '';
-            (item.cast || []).forEach(actor => {
-                const avatarSrc = actor.photo || getAvatarFallback(actor.name);
-                const fallbackUrl = getAvatarFallback(actor.name);
-                const card = document.createElement('button');
-                card.type = 'button';
-                card.onclick = () => filterByActor(actor.name);
-                card.className = "group/actor flex-shrink-0 w-24 sm:w-28 snap-start bg-surface-900/90 hover:bg-surface-700/80 p-2.5 rounded-xl border border-white/5 hover:border-violet-500/40 transition flex flex-col items-center text-center";
-                card.title = `Filter watchlist by ${actor.name}`;
-                card.innerHTML = `
-                    <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-surface-800 border-2 border-white/10 group-hover/actor:border-violet-400 transition shadow-md mb-2">
-                        <img 
-                            src="${avatarSrc}" 
-                            alt="${actor.name}" 
-                            onerror="this.onerror=null;this.src='${fallbackUrl}';"
-                            class="w-full h-full object-cover group-hover/actor:scale-105 transition duration-300"
-                        >
-                    </div>
-                    <span class="text-xs font-semibold text-white group-hover/actor:text-violet-300 transition line-clamp-1 w-full">${actor.name}</span>
-                    <span class="text-[11px] text-gray-400 line-clamp-1 w-full mt-0.5">${actor.role}</span>
-                `;
-                castContainer.appendChild(card);
-            });
+            for (const item of toAdd) {
+                const rawEntry = { title: item.title, tmdb_id: item.id, type: item.type, rewatches: 1 };
+                
+                // Append each to Google Sheet
+                if (state.sheetUrl) {
+                    try {
+                        await fetch(state.sheetUrl, {
+                            method: 'POST',
+                            mode: 'no-cors',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(rawEntry)
+                        });
+                    } catch (err) {
+                        console.error("Batch post error:", err);
+                    }
+                }
 
-            // Render Similar Recommendations inside modal
-            const recContainer = document.getElementById('modal-recommendations');
-            recContainer.innerHTML = '';
-            const sims = item.similar && item.similar.length > 0 ? item.similar : [
-                { id: 603, title: "The Matrix", type: "movie", poster: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg" },
-                { id: 872585, title: "Oppenheimer", type: "movie", poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg" }
-            ];
+                const enriched = await fetchTmdbDetailsAndCast(rawEntry);
+                if (enriched) {
+                    state.items.unshift(enriched);
+                }
+            }
 
-            sims.forEach(sim => {
-                const simCard = document.createElement('div');
-                simCard.className = "flex-shrink-0 w-28 bg-surface-900/90 rounded-xl overflow-hidden border border-white/5 p-2 flex flex-col justify-between group/sim";
-                simCard.innerHTML = `
-                    <div>
-                        <div class="aspect-[2/3] w-full rounded-lg overflow-hidden bg-surface-800 mb-1.5">
-                            <img src="${sim.poster}" alt="${sim.title}" class="w-full h-full object-cover group-hover/sim:scale-105 transition">
-                        </div>
-                        <h4 class="text-[11px] font-medium text-white truncate">${sim.title}</h4>
-                    </div>
-                    <button type="button" onclick='quickAddSimilar(${JSON.stringify(sim).replace(/'/g, "&apos;")})' class="mt-2 w-full py-1 rounded bg-violet-600/20 hover:bg-violet-600 text-violet-300 hover:text-white text-[10px] font-semibold transition border border-violet-500/30">
-                        + Add
-                    </button>
-                `;
-                recContainer.appendChild(simCard);
-            });
+            if (!state.sheetUrl || window.location.protocol === 'file:') {
+                localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
+            }
 
+            renderAll();
+            showStatus(`Successfully batch added ${toAdd.length} movies!`);
+        }
+
+        function filterByActor(actorName) {
+            closeDetailsModal();
+            const searchInput = document.getElementById('search-input');
+            if (searchInput) {
+                searchInput.value = actorName;
+                handleSearch(actorName);
+            }
+            showStatus(`Filtering watchlist by actor: ${actorName}`);
+        }
+
+        function closeDetailsModal() {
             const modal = document.getElementById('details-modal');
-            modal.classList.remove('hidden');
-            modal.classList.add('flex');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
         }
 
         async function quickAddSimilar(sim) {
             closeDetailsModal();
-            // Check for duplicate before adding
             const existing = state.items.find(i => Number(i.tmdb_id) === Number(sim.id));
             if (existing) {
                 existing.rewatches = (existing.rewatches || 1) + 1;
@@ -735,26 +1307,9 @@
             const enriched = await fetchTmdbDetailsAndCast(newRaw);
             if (enriched) {
                 state.items.unshift(enriched);
-                if (!state.sheetUrl) {
-                    localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
-                }
                 renderAll();
                 showStatus(`Added "${enriched.title}" successfully!`);
             }
-        }
-
-        function filterByActor(actorName) {
-            closeDetailsModal();
-            const searchInput = document.getElementById('search-input');
-            searchInput.value = actorName;
-            handleSearch(actorName);
-            showStatus(`Filtering watchlist by actor: ${actorName}`);
-        }
-
-        function closeDetailsModal() {
-            const modal = document.getElementById('details-modal');
-            modal.classList.add('hidden');
-            modal.classList.remove('flex');
         }
 
         async function removeSelectedEntry() {
@@ -763,16 +1318,11 @@
             const title = item.title;
             const tmdb_id = item.tmdb_id;
 
-            // Remove from local memory state
             state.items.splice(state.selectedIndex, 1);
             state.selectedIndex = null;
             closeDetailsModal();
 
-            // Update local storage if in demo / offline mode
-            if (!state.sheetUrl) {
-                localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
-            } else {
-                // Inform Google Sheet to delete row if supported by backend script
+            if (state.sheetUrl) {
                 try {
                     await fetch(state.sheetUrl, {
                         method: 'POST',
@@ -793,61 +1343,23 @@
             if (state.selectedIndex === null) return;
             const item = state.items[state.selectedIndex];
             item.rewatches = Math.max(1, (item.rewatches || 1) + delta);
-            document.getElementById('modal-rewatch').textContent = item.rewatches;
-            if (!state.sheetUrl) {
-                localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
-            }
-            renderAll();
-        }
-
-        function pickRandomWatched() {
-            if (state.items.length === 0) return;
-            const randomIndex = Math.floor(Math.random() * state.items.length);
-            openDetailsModal(randomIndex);
-        }
-
-        function setFilter(type) {
-            state.activeFilter = type;
-            ['all', 'movie', 'series'].forEach(t => {
-                const btn = document.getElementById(`tab-${t}`);
-                if (t === type) {
-                    btn.className = "filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white";
-                } else {
-                    btn.className = "filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white";
-                }
-            });
-            renderAll();
-        }
-
-        function setIndustryFilter(industry) {
-            state.activeIndustry = industry;
-            ['all', 'hollywood', 'bollywood', 'anime', 'kdrama'].forEach(ind => {
-                const btn = document.getElementById(`ind-${ind}`);
-                if (!btn) return;
-                if (ind === industry) {
-                    btn.className = "ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition bg-violet-600/30 text-violet-200 border border-violet-500/30";
-                } else {
-                    btn.className = "ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white";
-                }
-            });
-            renderAll();
-        }
-
-        function handleSearch(val) {
-            state.searchQuery = val;
+            const el = document.getElementById('modal-rewatch');
+            if (el) el.textContent = item.rewatches;
             renderAll();
         }
 
         // ============================================================================
-        // 6. LIVE TMDB SEARCH TO ADD MOVIES/SERIES DIRECTLY
+        // 7. TMDB SEARCH & ADD ENTRY HANDLERS
         // ============================================================================
         let searchTimeout = null;
         function debouncedTmdbSearch(query) {
             clearTimeout(searchTimeout);
             const resultsBox = document.getElementById('tmdb-search-results');
             if (!query || query.trim().length < 2) {
-                resultsBox.classList.add('hidden');
-                resultsBox.innerHTML = '';
+                if (resultsBox) {
+                    resultsBox.classList.add('hidden');
+                    resultsBox.innerHTML = '';
+                }
                 return;
             }
             searchTimeout = setTimeout(() => performTmdbSearch(query.trim()), 280);
@@ -855,139 +1367,81 @@
 
         async function performTmdbSearch(query) {
             const resultsBox = document.getElementById('tmdb-search-results');
+            if (!resultsBox) return;
             resultsBox.classList.remove('hidden');
             resultsBox.innerHTML = `<div class="p-3 text-xs text-gray-400">Searching for "${query}"...</div>`;
 
-            // If user hasn't added their TMDB API key yet, search the built-in Demo Catalog so they can test it immediately
-            if (!state.tmdbKey) {
-                const combinedDemo = [...DEMO_SEARCH_CATALOG, ...DEMO_WATCHLIST];
-                const matches = combinedDemo.filter(item => item.title.toLowerCase().includes(query.toLowerCase()));
-                renderSearchResults(matches.map(m => ({
-                    id: m.tmdb_id,
-                    title: m.title,
-                    type: m.type,
-                    year: m.year,
-                    poster: m.poster
-                })), true);
-                return;
-            }
-
             try {
-                const url = `https://api.themoviedb.org/3/search/multi?api_key=${state.tmdbKey}&query=${encodeURIComponent(query)}&include_adult=false`;
-                const res = await fetch(url);
-                const data = await res.json();
-                const validResults = (data.results || [])
+                const data = await fetchTmdbApi(`/search/multi?query=${encodeURIComponent(query)}&include_adult=false`);
+                if (!data || !data.results) throw new Error("Search failed");
+
+                const validResults = data.results
                     .filter(r => r.media_type === 'movie' || r.media_type === 'tv')
                     .slice(0, 8)
                     .map(r => {
                         const dateStr = r.release_date || r.first_air_date || '';
-                        const origLang = r.original_language || '';
-                        const origCountry = (r.origin_country && r.origin_country[0]) || '';
-                        const ind = detectIndustry(origLang, origCountry);
                         return {
                             id: r.id,
                             title: r.title || r.name,
                             type: r.media_type === 'tv' ? 'series' : 'movie',
                             year: dateStr ? dateStr.split('-')[0] : 'N/A',
-                            rating: r.vote_average ? r.vote_average.toFixed(1) : null,
-                            overview: r.overview || 'No synopsis provided.',
-                            industryLabel: ind.label,
-                            poster: r.poster_path ? `${IMG_BASE_URL}${r.poster_path}` : 'https://placehold.co/120x180/1c1e2d/c4b5fd?text=No+Poster'
+                            overview: r.overview || '',
+                            poster: r.poster_path ? `${PROFILE_BASE_URL}${r.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster'
                         };
                     });
-                renderSearchResults(validResults, false);
+                renderSearchResults(validResults);
             } catch (err) {
                 console.error("TMDB multi-search failed:", err);
-                resultsBox.innerHTML = `<div class="p-3 text-xs text-rose-400">Error searching TMDB. Check your API key.</div>`;
+                resultsBox.innerHTML = `<div class="p-3 text-xs text-rose-400">Error searching TMDB. Check connection.</div>`;
             }
         }
 
-        function renderSearchResults(results, isDemoSearch) {
+        function renderSearchResults(results) {
             const resultsBox = document.getElementById('tmdb-search-results');
+            if (!resultsBox) return;
             resultsBox.innerHTML = '';
 
             if (results.length === 0) {
                 resultsBox.innerHTML = `
-                    <div class="p-3.5 rounded-xl bg-surface-900 border border-white/10 text-xs text-gray-400">
-                        No matches found for that title. Try refining your keywords.
+                    <div class="p-3 rounded-xl bg-surface-900 border border-white/10 text-xs text-gray-400">
+                        No matches found.
                     </div>
                 `;
                 return;
             }
 
             results.forEach(item => {
-                const row = document.createElement('div');
+                const row = document.createElement('button');
+                row.type = 'button';
                 row.onclick = () => selectSearchResult(item);
-                row.className = "w-full p-2.5 rounded-xl bg-surface-900 hover:bg-surface-800 border border-white/5 hover:border-violet-500/40 transition flex items-start gap-3 cursor-pointer group";
+                row.className = "w-full p-2 rounded-xl bg-surface-900 hover:bg-surface-700 border border-white/5 hover:border-violet-500/40 transition flex items-center gap-3 text-left group";
                 row.innerHTML = `
-                    <img src="${item.poster}" alt="${item.title}" class="w-14 h-20 sm:w-16 sm:h-24 object-cover rounded-lg bg-surface-800 flex-shrink-0 shadow-md group-hover:scale-105 transition duration-300">
+                    <img src="${item.poster}" alt="${item.title}" class="w-10 h-14 object-cover rounded-lg bg-surface-800 flex-shrink-0">
                     <div class="flex-1 min-w-0">
-                        <div class="flex items-start justify-between gap-2">
-                            <h4 class="text-xs sm:text-sm font-semibold text-white group-hover:text-violet-300 truncate">${item.title}</h4>
-                            <span class="text-[11px] font-semibold text-emerald-400 px-2.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-black transition flex-shrink-0">
-                                Select
-                            </span>
-                        </div>
-                        <div class="text-[11px] text-gray-400 flex items-center gap-2 mt-1 flex-wrap">
+                        <div class="text-xs font-semibold text-white group-hover:text-violet-300 truncate">${item.title}</div>
+                        <div class="text-[11px] text-gray-400 flex items-center gap-2 mt-0.5">
                             <span class="uppercase font-bold text-[10px] px-1.5 py-0.2 rounded bg-white/5 text-violet-300">${item.type}</span>
                             <span>${item.year}</span>
-                            ${item.rating ? `<span class="text-amber-400 font-medium">★ ${item.rating}</span>` : ''}
-                            ${item.industryLabel ? `<span class="text-amber-300/80">${item.industryLabel}</span>` : ''}
                             <span class="font-mono text-gray-500">#${item.id}</span>
                         </div>
-                        <p class="text-[11px] text-gray-400 mt-1.5 line-clamp-2 leading-relaxed">${item.overview || ''}</p>
                     </div>
+                    <span class="text-[11px] font-semibold text-emerald-400 px-2.5 py-1 rounded-lg bg-emerald-500/10 border border-emerald-500/20 group-hover:bg-emerald-500 group-hover:text-black transition">
+                        Select
+                    </span>
                 `;
                 resultsBox.appendChild(row);
             });
         }
 
-        function selectSearchResult(item) {
-            document.getElementById('input-title').value = item.title;
-            document.getElementById('input-tmdb-id').value = item.id;
-            document.getElementById('input-type').value = item.type;
-            
-            // Populate Confirmation Preview Card
-            const previewCard = document.getElementById('selected-preview-card');
-            document.getElementById('preview-poster').src = item.poster;
-            document.getElementById('preview-title').textContent = item.title;
-            document.getElementById('preview-type-badge').textContent = (item.type || 'movie').toUpperCase();
-            document.getElementById('preview-year').textContent = item.year || '';
-            document.getElementById('preview-rating').textContent = item.rating ? `★ ${item.rating}` : '';
-            document.getElementById('preview-industry').textContent = item.industryLabel || 'Hollywood';
-            document.getElementById('preview-overview').textContent = item.overview || 'No synopsis available.';
-            previewCard.classList.remove('hidden');
-
-            document.getElementById('tmdb-search-results').classList.add('hidden');
-            document.getElementById('tmdb-search-query').value = '';
-        }
-
-        // Add Modal Handlers
-        function openAddModal() {
-            const m = document.getElementById('add-modal');
-            m.classList.remove('hidden');
-            m.classList.add('flex');
-            setTimeout(() => document.getElementById('tmdb-search-query').focus(), 50);
-        }
-        function closeAddModal() {
-            const m = document.getElementById('add-modal');
-            m.classList.add('hidden');
-            m.classList.remove('flex');
-            document.getElementById('tmdb-search-results').classList.add('hidden');
-            document.getElementById('tmdb-search-query').value = '';
-            document.getElementById('selected-preview-card').classList.add('hidden');
-        }
-
         async function handleAddEntry(e) {
             e.preventDefault();
-            const title = document.getElementById('input-title').value.trim();
-            const tmdb_id = Number(document.getElementById('input-tmdb-id').value.trim());
-            const type = document.getElementById('input-type').value;
+            const titleInput = document.getElementById('input-title');
+            const idInput = document.getElementById('input-tmdb-id');
+            const typeInput = document.getElementById('input-type');
 
-            if (!tmdb_id) {
-                showStatus("Please search and select a title from the list first to confirm details.");
-                return;
-            }
+            const title = titleInput ? titleInput.value.trim() : '';
+            const tmdb_id = idInput ? Number(idInput.value.trim()) : 0;
+            const type = typeInput ? typeInput.value : 'movie';
 
             // Check if already in list
             const existing = state.items.find(i => Number(i.tmdb_id) === tmdb_id || i.title.toLowerCase() === title.toLowerCase());
@@ -995,7 +1449,7 @@
                 closeAddModal();
                 existing.rewatches = (existing.rewatches || 1) + 1;
                 renderAll();
-                showStatus(`"${title}" was already in your list! Incremented rewatch count to ${existing.rewatches} instead of creating a duplicate.`);
+                showStatus(`"${title}" was already in your list! Incremented rewatch count to ${existing.rewatches}.`);
                 e.target.reset();
                 return;
             }
@@ -1005,7 +1459,6 @@
 
             const newEntryRaw = { title, tmdb_id, type, rewatches: 1 };
 
-            // Post to Google Sheet if configured
             if (state.sheetUrl) {
                 try {
                     await fetch(state.sheetUrl, {
@@ -1022,53 +1475,21 @@
             const enriched = await fetchTmdbDetailsAndCast(newEntryRaw);
             if (enriched) {
                 state.items.unshift(enriched);
-                if (!state.sheetUrl) {
-                    localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
-                }
                 renderAll();
                 showStatus(`Added "${enriched.title}"!`);
             }
             e.target.reset();
         }
 
-        // Setup Modal Handlers
-        function openSetupModal() {
-            const m = document.getElementById('setup-modal');
-            m.classList.remove('hidden');
-            m.classList.add('flex');
-        }
-        function closeSetupModal() {
-            const m = document.getElementById('setup-modal');
-            m.classList.add('hidden');
-            m.classList.remove('flex');
-        }
-
-        function saveConfiguration() {
-            state.tmdbKey = document.getElementById('config-tmdb-key').value.trim();
-            state.sheetUrl = document.getElementById('config-sheet-url').value.trim();
-            localStorage.setItem('cinetrack_tmdb_key', state.tmdbKey);
-            localStorage.setItem('cinetrack_sheet_url', state.sheetUrl);
-            closeSetupModal();
-            initApp();
-        }
-
-        function resetToDemo() {
-            localStorage.removeItem('cinetrack_tmdb_key');
-            localStorage.removeItem('cinetrack_sheet_url');
-            localStorage.removeItem('cinetrack_demo_items');
-            state.tmdbKey = '';
-            state.sheetUrl = '';
-            closeSetupModal();
-            initApp();
-        }
-
         function showStatus(msg) {
             const banner = document.getElementById('status-banner');
-            document.getElementById('status-message').textContent = msg;
-            banner.classList.remove('hidden');
+            const msgEl = document.getElementById('status-message');
+            if (msgEl) msgEl.textContent = msg;
+            if (banner) banner.classList.remove('hidden');
         }
         function hideStatus() {
-            document.getElementById('status-banner').classList.add('hidden');
+            const banner = document.getElementById('status-banner');
+            if (banner) banner.classList.add('hidden');
         }
 
         // Close modals on Escape key
@@ -1076,6 +1497,7 @@
             if (e.key === 'Escape') {
                 closeDetailsModal();
                 closeAddModal();
+                closeFranchiseModal();
             }
         });
 
