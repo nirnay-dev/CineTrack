@@ -93,11 +93,11 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="font-display text-xl font-bold tracking-tight text-white">CineTrack</h1>
-                        <span id="mode-badge" class="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">
-                            Demo Mode
+                        <span id="mode-badge" class="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                            Live Synced
                         </span>
                     </div>
-                    <p class="text-xs text-gray-400">Minimalist Google Sheet + TMDB Watchlist</p>
+                    <p class="text-xs text-gray-400">Personal Movie & Series Watchlist</p>
                 </div>
             </div>
 
@@ -135,10 +135,9 @@
                     <span>Add Entry</span>
                 </button>
 
-                <button onclick="openSetupModal()" class="p-2 rounded-xl bg-surface-700 hover:bg-surface-600 text-gray-300 border border-white/10 transition" title="Configure Google Sheet & TMDB API">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                <button onclick="loadFromGoogleSheet()" class="p-2 rounded-xl bg-surface-700 hover:bg-surface-600 text-gray-300 border border-white/10 transition" title="Refresh & Sync from Sheet">
+                    <svg class="w-5 h-5 text-gray-300 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
                 </button>
             </div>
@@ -341,68 +340,6 @@
         </div>
     </div>
 
-    <!-- Setup & Google Apps Script Guide Modal -->
-    <div id="setup-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 border border-white/15 max-h-[90vh] overflow-y-auto">
-            <div class="flex items-center justify-between mb-4">
-                <div>
-                    <h3 class="font-display text-lg font-bold text-white">Backend & API Configuration</h3>
-                    <p class="text-xs text-gray-400">Connect your free TMDB API Key and Google Sheet Web App URL</p>
-                </div>
-                <button onclick="closeSetupModal()" class="text-gray-400 hover:text-white text-xl">&times;</button>
-            </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-gray-300 mb-1">TMDB API Key (v3 auth)</label>
-                    <input type="text" id="config-tmdb-key" value="94aec3d2bafb2bc5e0bb42a917ad8dac" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white font-mono" readonly>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-gray-300 mb-1">Google Apps Script Web App URL</label>
-                    <input type="url" id="config-sheet-url" value="https://script.google.com/macros/s/AKfycbz8eCMRt086alMQvf81QrxDBu3qU76sDEloHrbi4ZA4nVWMmQTBOLRLk4n7nXFihNUn/exec"class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white font-mono" readyonly>
-                </div>
-
-                <div class="flex items-center justify-between pt-2">
-                    <button onclick="resetToDemo()" class="text-xs text-amber-400 hover:underline">Reset to Demo Mode</button>
-                    <button onclick="saveConfiguration()" class="px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white">Save & Sync</button>
-                </div>
-
-                <hr class="border-white/10 my-4">
-
-                <!-- Step-by-Step Google Sheet + Apps Script Code -->
-                <div>
-                    <h4 class="text-xs font-bold uppercase tracking-wider text-violet-400 mb-2">Step-by-Step Google Sheet Setup</h4>
-                    <ol class="text-xs text-gray-300 space-y-1.5 list-decimal list-inside mb-3">
-                        <li>Create a new Google Sheet and name Row 1 headers: <code class="text-emerald-300">title</code>, <code class="text-emerald-300">tmdb_id</code>, <code class="text-emerald-300">type</code>, <code class="text-emerald-300">rewatches</code></li>
-                        <li>Click <strong>Extensions &rarr; Apps Script</strong> and paste the script below:</li>
-                        <li>Click <strong>Deploy &rarr; New deployment &rarr; Web app</strong> (Execute as: <em>Me</em>, Who has access: <em>Anyone</em>).</li>
-                    </ol>
-                    <pre class="p-3 rounded-xl bg-surface-900 border border-white/10 text-[11px] text-gray-300 font-mono overflow-x-auto select-all">function doGet() {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const rows = sheet.getDataRange().getValues();
-  const headers = rows.shift();
-  const data = rows.map(r => ({
-    title: r[0],
-    tmdb_id: r[1],
-    type: r[2] || 'movie',
-    rewatches: Number(r[3] || 1)
-  }));
-  return ContentService.createTextOutput(JSON.stringify({ status: 'success', data }))
-    .setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
-  const body = JSON.parse(e.postData.contents);
-  sheet.appendRow([body.title, body.tmdb_id, body.type, body.rewatches || 1]);
-  return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
-    .setMimeType(ContentService.MimeType.JSON);
-}</pre>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Required TMDB Attribution Footer -->
     <footer class="border-t border-white/5 py-6 mt-12 text-center text-xs text-gray-500">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
@@ -413,190 +350,11 @@ function doPost(e) {
 
     <script>
         // ============================================================================
-        // 1. DEMO FALLBACK DATASET (Works out-of-the-box before connecting API keys)
+        // 2. STATE & CONFIGURATION (Hardcoded backend & API values)
         // ============================================================================
-        const DEMO_WATCHLIST = [
-            {
-                title: "Inception",
-                tmdb_id: 27205,
-                type: "movie",
-                rewatches: 3,
-                year: "2010",
-                runtime: 148,
-                poster: "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
-                overview: "Cobb, a skilled thief who commits corporate espionage by infiltrating the subconscious of his targets is offered a chance to regain his old life as payment for a task considered to be impossible: inception.",
-                cast: [
-                    { name: "Leonardo DiCaprio", role: "Dom Cobb", photo: "https://image.tmdb.org/t/p/w185/wo2hJpn04vbtmh0B9utCFdsQhxM.jpg" },
-                    { name: "Joseph Gordon-Levitt", role: "Arthur", photo: "https://image.tmdb.org/t/p/w185/z2FA8js799xqtfiFjBTicFYdfk.jpg" },
-                    { name: "Cillian Murphy", role: "Robert Fischer", photo: "https://image.tmdb.org/t/p/w185/dm6V24JJJVKB7qNv4T2Yq7N9J8N.jpg" },
-                    { name: "Tom Hardy", role: "Eames", photo: "https://image.tmdb.org/t/p/w185/d81K0RH8UX7tZj49tZaQhZ9ewH.jpg" },
-                    { name: "Elliot Page", role: "Ariadne", photo: "https://image.tmdb.org/t/p/w185/eCeFgzS8dYHnMfWQT0oQitCrsSz.jpg" }
-                ]
-            },
-            {
-                title: "Interstellar",
-                tmdb_id: 157336,
-                type: "movie",
-                rewatches: 4,
-                year: "2014",
-                runtime: 169,
-                poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-                overview: "The adventures of a group of explorers who make use of a newly discovered wormhole to surpass the limitations on human space travel and conquer the vast distances involved in an interstellar voyage.",
-                cast: [
-                    { name: "Matthew McConaughey", role: "Cooper", photo: "https://image.tmdb.org/t/p/w185/e9ZHRY5toiBZCIPEEyvOG9A8ers.jpg" },
-                    { name: "Anne Hathaway", role: "Brand", photo: "https://image.tmdb.org/t/p/w185/s6tflSD20MGz04ZR2R1lZvhmC4Y.jpg" },
-                    { name: "Jessica Chastain", role: "Murph", photo: "https://image.tmdb.org/t/p/w185/bXFXy557Q5bf13F2B3W6d8S4T26.jpg" },
-                    { name: "Michael Caine", role: "Professor Brand", photo: "https://image.tmdb.org/t/p/w185/hZruclwEPCKw3e83rnFSIH5sRFZ.jpg" },
-                    { name: "Matt Damon", role: "Mann", photo: "https://image.tmdb.org/t/p/w185/At3JgvaNeEN4Z4ESKlhhes85Xo3.jpg" }
-                ]
-            },
-            {
-                title: "Breaking Bad",
-                tmdb_id: 1396,
-                type: "series",
-                rewatches: 2,
-                year: "2008",
-                runtime: 450,
-                poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
-                overview: "Walter White, a New Mexico chemistry teacher, is diagnosed with Stage III cancer and given a prognosis of only two years left to live. He becomes filled with a sense of fearlessness and an unrelenting desire to secure his family's financial future at any cost.",
-                cast: [
-                    { name: "Bryan Cranston", role: "Walter White", photo: "https://image.tmdb.org/t/p/w185/7Jahy5LZX2Fo8fGJltMreAI49hC.jpg" },
-                    { name: "Aaron Paul", role: "Jesse Pinkman", photo: "https://image.tmdb.org/t/p/w185/8Ac9uuoYwZoYVAIJfRLzzLsGGJn.jpg" },
-                    { name: "Anna Gunn", role: "Skyler White", photo: "https://image.tmdb.org/t/p/w185/adppyeu1a4REN3khtgmXusrapFi.jpg" },
-                    { name: "Bob Odenkirk", role: "Saul Goodman", photo: "https://image.tmdb.org/t/p/w185/rF0Lb6SBhGSTvjRffmlKRSeI3jE.jpg" },
-                    { name: "Giancarlo Esposito", role: "Gus Fring", photo: "https://image.tmdb.org/t/p/w185/lBvDQZjxhIGMbH61iHnqerpbqHc.jpg" }
-                ]
-            },
-            {
-                title: "Dune: Part Two",
-                tmdb_id: 693134,
-                type: "movie",
-                rewatches: 1,
-                year: "2024",
-                runtime: 167,
-                poster: "https://image.tmdb.org/t/p/w500/1pdfLvkbY9ohJlCjQH2CZjjYVvJ.jpg",
-                overview: "Follow the mythic journey of Paul Atreides as he unites with Chani and the Fremen while on a path of revenge against the conspirators who destroyed his family.",
-                cast: [
-                    { name: "Timothée Chalamet", role: "Paul Atreides", photo: "https://image.tmdb.org/t/p/w185/BE2sdjpgsa2rNTFa66f7upkaOP.jpg" },
-                    { name: "Zendaya", role: "Chani", photo: "https://image.tmdb.org/t/p/w185/3WdOloHpjtjL96uVOhFRRCcYSwq.jpg" },
-                    { name: "Rebecca Ferguson", role: "Lady Jessica", photo: "https://image.tmdb.org/t/p/w185/lJloTOheuQSirSLXNA3JHsrMNfH.jpg" },
-                    { name: "Javier Bardem", role: "Stilgar", photo: "https://image.tmdb.org/t/p/w185/eCBiiPvBfIY7exDQwH0vEM6Bf3c.jpg" },
-                    { name: "Austin Butler", role: "Feyd-Rautha", photo: "https://image.tmdb.org/t/p/w185/r9X2bd13M5P3h0H1kR2hH7Y6H5s.jpg" }
-                ]
-            },
-            {
-                title: "Severance",
-                tmdb_id: 95396,
-                type: "series",
-                rewatches: 1,
-                year: "2022",
-                runtime: 270,
-                poster: "https://image.tmdb.org/t/p/w500/pPHpeI2X1qEd1CS1SeyrdhZ4qnT.jpg",
-                overview: "Mark leads a team of office workers whose memories have been surgically divided between their work and personal lives. When a mysterious colleague appears outside of work, it begins a journey to discover the truth about their jobs.",
-                cast: [
-                    { name: "Adam Scott", role: "Mark Scout", photo: "https://image.tmdb.org/t/p/w185/b82C29R6f8c2M7S5zG7P2w1n9v.jpg" },
-                    { name: "Britt Lower", role: "Helly Riggs", photo: "https://image.tmdb.org/t/p/w185/2d5b7Z6c9e0F3g4H5i6J7k8L9m0.jpg" },
-                    { name: "Patricia Arquette", role: "Harmony Cobel", photo: "https://image.tmdb.org/t/p/w185/citation_needed.jpg" },
-                    { name: "John Turturro", role: "Irving Bailiff", photo: "https://image.tmdb.org/t/p/w185/6O9W9c7B5N4M3L2K1J0I9H8G7F6.jpg" }
-                ]
-            },
-            {
-                title: "The Dark Knight",
-                tmdb_id: 155,
-                type: "movie",
-                rewatches: 5,
-                year: "2008",
-                runtime: 152,
-                poster: "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-                overview: "Batman raises the stakes in his war on crime. With the help of Lt. Jim Gordon and District Attorney Harvey Dent, Batman sets out to dismantle the remaining criminal organizations that plague the streets.",
-                cast: [
-                    { name: "Christian Bale", role: "Bruce Wayne", photo: "https://image.tmdb.org/t/p/w185/qCpZn2e3dimwbryLnqxZuI88PTi.jpg" },
-                    { name: "Heath Ledger", role: "Joker", photo: "https://image.tmdb.org/t/p/w185/5Y9HnYYa9jF4NunY9lSgJGjSe8E.jpg" },
-                    { name: "Aaron Eckhart", role: "Harvey Dent", photo: "https://image.tmdb.org/t/p/w185/6r2R3F4G5H6J7K8L9M0N1P2Q3R4.jpg" },
-                    { name: "Gary Oldman", role: "James Gordon", photo: "https://image.tmdb.org/t/p/w185/2v9FVVBUrrkW2m3QOcYkuhq9A6o.jpg" },
-                    { name: "Michael Caine", role: "Alfred", photo: "https://image.tmdb.org/t/p/w185/hZruclwEPCKw3e83rnFSIH5sRFZ.jpg" }
-                ]
-            }
-        ];
+        const DEFAULT_TMDB_KEY = "94aec3d2bafb2bc5e0bb42a917ad8dac";
+        const DEFAULT_SHEET_URL = "https://script.google.com/macros/s/AKfycbz8eCMRt086alMQvf81QrxDBu3qU76sDEloHrbi4ZA4nVWMmQTBOLRLk4n7nXFihNUn/exec";
 
-        // Extra catalog for instant search preview when in Demo Mode (no API key yet)
-        const DEMO_SEARCH_CATALOG = [
-            {
-                title: "Oppenheimer",
-                tmdb_id: 872585,
-                type: "movie",
-                year: "2023",
-                runtime: 181,
-                poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
-                overview: "The story of J. Robert Oppenheimer's role in the development of the atomic bomb during World War II.",
-                cast: [
-                    { name: "Cillian Murphy", role: "J. Robert Oppenheimer", photo: "https://image.tmdb.org/t/p/w185/dm6V24JJJVKB7qNv4T2Yq7N9J8N.jpg" },
-                    { name: "Emily Blunt", role: "Kitty Oppenheimer", photo: "https://image.tmdb.org/t/p/w185/5nCSG5TL1bP1geD8aaBfaLnLLCD.jpg" },
-                    { name: "Matt Damon", role: "Leslie Groves", photo: "https://image.tmdb.org/t/p/w185/At3JgvaNeEN4Z4ESKlhhes85Xo3.jpg" },
-                    { name: "Robert Downey Jr.", role: "Lewis Strauss", photo: "https://image.tmdb.org/t/p/w185/im9SAqJPZKEbVZGmjXuLI4O7RvM.jpg" }
-                ]
-            },
-            {
-                title: "Stranger Things",
-                tmdb_id: 66732,
-                type: "series",
-                year: "2016",
-                runtime: 340,
-                poster: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
-                overview: "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.",
-                cast: [
-                    { name: "Millie Bobby Brown", role: "Eleven", photo: "https://image.tmdb.org/t/p/w185/2685xGmq68G6t0U77P6V6U2I7sD.jpg" },
-                    { name: "Finn Wolfhard", role: "Mike Wheeler", photo: "https://image.tmdb.org/t/p/w185/5OV5qu2075B8G2d1h7s7v9c3C3A.jpg" },
-                    { name: "Winona Ryder", role: "Joyce Byers", photo: "https://image.tmdb.org/t/p/w185/5yteOSY2lgGOgSWmRTlxqfY59MS.jpg" },
-                    { name: "David Harbour", role: "Jim Hopper", photo: "https://image.tmdb.org/t/p/w185/chPekukMF5SNnW6b22NbYPqAStr.jpg" }
-                ]
-            },
-            {
-                title: "The Matrix",
-                tmdb_id: 603,
-                type: "movie",
-                year: "1999",
-                runtime: 136,
-                poster: "https://image.tmdb.org/t/p/w500/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
-                overview: "Set in the 22nd century, The Matrix tells the story of a computer hacker who joins a group of underground insurgents fighting the vast and powerful computers who now rule the earth.",
-                cast: [
-                    { name: "Keanu Reeves", role: "Neo", photo: "https://image.tmdb.org/t/p/w185/4D0PpNI0kmP58hgrwGC3wCjxhnm.jpg" },
-                    { name: "Laurence Fishburne", role: "Morpheus", photo: "https://image.tmdb.org/t/p/w185/8suOhUmPbfKqDQ17jQ1Gy0mI3P4.jpg" },
-                    { name: "Carrie-Anne Moss", role: "Trinity", photo: "https://image.tmdb.org/t/p/w185/xD4jTA3KmVp5Rq3aHcymL9DUGjD.jpg" }
-                ]
-            },
-            {
-                title: "Arcane",
-                tmdb_id: 94605,
-                type: "series",
-                year: "2021",
-                runtime: 360,
-                poster: "https://image.tmdb.org/t/p/w500/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
-                overview: "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war between magic technologies and clashing convictions.",
-                cast: [
-                    { name: "Hailee Steinfeld", role: "Vi (voice)", photo: "https://image.tmdb.org/t/p/w185/dxSDWkiVaC6JYjrV3XRAZI7HOSS.jpg" },
-                    { name: "Ella Purnell", role: "Jinx (voice)", photo: "https://image.tmdb.org/t/p/w185/xY5v3N7z2W9T6R5H8K1M4P7Q2S.jpg" }
-                ]
-            },
-            {
-                title: "Spider-Man: Across the Spider-Verse",
-                tmdb_id: 569094,
-                type: "movie",
-                year: "2023",
-                runtime: 140,
-                poster: "https://image.tmdb.org/t/p/w500/8Vt6mWEReuy4Of61Lnj5Xj704m8.jpg",
-                overview: "After reuniting with Gwen Stacy, Brooklyn’s full-time, friendly neighborhood Spider-Man is catapulted across the Multiverse.",
-                cast: [
-                    { name: "Shameik Moore", role: "Miles Morales (voice)", photo: "https://image.tmdb.org/t/p/w185/uJNaST3uC0s2d3F8G5H7J9K1L2M.jpg" },
-                    { name: "Hailee Steinfeld", role: "Gwen Stacy (voice)", photo: "https://image.tmdb.org/t/p/w185/dxSDWkiVaC6JYjrV3XRAZI7HOSS.jpg" },
-                    { name: "Oscar Isaac", role: "Miguel O'Hara (voice)", photo: "https://image.tmdb.org/t/p/w185/dW5U5yrIIPmMjRThR9KT2xH6nTz.jpg" }
-                ]
-            }
-        ];
-
-        // ============================================================================
-        // 2. STATE & CONFIGURATION
-        // ============================================================================
         const IMG_BASE_URL = "https://image.tmdb.org/t/p/w500";
         const PROFILE_BASE_URL = "https://image.tmdb.org/t/p/w185";
         let state = {
@@ -604,8 +362,8 @@ function doPost(e) {
             activeFilter: 'all',
             searchQuery: '',
             selectedIndex: null,
-            tmdbKey: localStorage.getItem('cinetrack_tmdb_key') || '',
-            sheetUrl: localStorage.getItem('cinetrack_sheet_url') || ''
+            tmdbKey: DEFAULT_TMDB_KEY,
+            sheetUrl: DEFAULT_SHEET_URL
         };
 
         // Helper to generate SVG initials avatar fallback when an actor photo fails to load
@@ -615,19 +373,16 @@ function doPost(e) {
         }
 
         // ============================================================================
-        // 3. DATA FETCHING (Live Google Sheet + TMDB Credits or Demo Mode)
+        // 3. DATA FETCHING (Live Google Sheet + TMDB Credits)
         // ============================================================================
         async function initApp() {
             const badge = document.getElementById('mode-badge');
-            document.getElementById('config-tmdb-key').value = state.tmdbKey;
-            document.getElementById('config-sheet-url').value = state.sheetUrl;
-
-            if (state.tmdbKey && state.sheetUrl) {
-                badge.textContent = "Live Google Sheet";
+            if (state.sheetUrl && window.location.protocol !== 'file:') {
+                badge.textContent = "Live Synced";
                 badge.className = "text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
                 await loadFromGoogleSheet();
             } else {
-                badge.textContent = "Demo Mode";
+                badge.textContent = "Local Mode";
                 badge.className = "text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30";
                 const savedDemo = localStorage.getItem('cinetrack_demo_items');
                 state.items = savedDemo ? JSON.parse(savedDemo) : [...DEMO_WATCHLIST];
@@ -1184,7 +939,6 @@ function doPost(e) {
             if (e.key === 'Escape') {
                 closeDetailsModal();
                 closeAddModal();
-                closeSetupModal();
             }
         });
 
