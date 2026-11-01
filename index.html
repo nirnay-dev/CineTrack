@@ -2,7 +2,10 @@
 <html lang="en" class="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#0a0a0f">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>CineTrack — Personal Watchlist & Series Tracker</title>
     <!-- Favicon fix to prevent 404 errors -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎬</text></svg>">
@@ -47,6 +50,7 @@
             background-color: #0a0a0f;
             color: #f3f4f6;
             overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
         }
         /* Custom scrollbar */
         ::-webkit-scrollbar {
@@ -71,10 +75,33 @@
             box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.7), 0 0 20px 0 rgba(139, 92, 246, 0.2);
         }
         .glass-panel {
-            background: rgba(18, 19, 28, 0.82);
+            background: rgba(18, 19, 28, 0.85);
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        @keyframes slideUp {
+            from {
+                transform: translateY(100%);
+                opacity: 0.6;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        .animate-slideUp {
+            animation: slideUp 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .pb-safe {
+            padding-bottom: max(0.75rem, env(safe-area-inset-bottom));
         }
     </style>
 </head>
@@ -82,26 +109,26 @@
 
     <!-- Top Navigation & Action Bar -->
     <header class="sticky top-0 z-30 glass-panel border-b border-white/10">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-wrap items-center justify-between gap-4">
+        <div class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-3 sm:py-4 flex items-center justify-between gap-3">
             <!-- Brand Logo -->
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-600/30">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="flex items-center gap-2.5 sm:gap-3">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-br from-violet-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-violet-600/30 flex-shrink-0">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path>
                     </svg>
                 </div>
                 <div>
                     <div class="flex items-center gap-2">
-                        <h1 class="font-display text-xl font-bold tracking-tight text-white">CineTrack</h1>
-                        <span id="mode-badge" class="text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <h1 class="font-display text-lg sm:text-xl font-bold tracking-tight text-white leading-tight">CineTrack</h1>
+                        <span id="mode-badge" class="text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
                             Live Synced
                         </span>
                     </div>
-                    <p class="text-xs text-gray-400">Personal Movie & Series Watchlist</p>
+                    <p class="text-[11px] sm:text-xs text-gray-400">Personal Movie & Series Watchlist</p>
                 </div>
             </div>
 
-            <!-- Quick Stats Bar -->
+            <!-- Quick Stats Bar (Desktop) -->
             <div class="hidden md:flex items-center gap-6 bg-surface-800/90 px-5 py-2 rounded-xl border border-white/5">
                 <div>
                     <span class="text-xs text-gray-400 block">Watched</span>
@@ -119,186 +146,258 @@
                 </div>
             </div>
 
-            <!-- Action Buttons -->
-            <div class="flex items-center gap-2.5">
-                <button onclick="pickRandomWatched()" class="px-3.5 py-2 rounded-xl bg-surface-700 hover:bg-surface-600 text-gray-200 text-xs sm:text-sm font-medium flex items-center gap-2 border border-white/10 transition" title="Pick a random movie or series from your list">
+            <!-- Action Buttons (Desktop has full labels; Mobile uses Bottom Bar + Quick Sync) -->
+            <div class="flex items-center gap-2">
+                <button onclick="pickRandomWatched()" class="hidden sm:flex px-3.5 py-2 rounded-xl bg-surface-700 hover:bg-surface-600 active:scale-95 text-gray-200 text-xs sm:text-sm font-medium items-center gap-2 border border-white/10 transition" title="Pick a random movie or series from your list">
                     <svg class="w-4 h-4 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
                     </svg>
                     <span>Surprise Me</span>
                 </button>
 
-                <button onclick="openFranchiseModal()" class="px-3.5 py-2 rounded-xl bg-surface-700 hover:bg-surface-600 text-gray-200 text-xs sm:text-sm font-medium flex items-center gap-1.5 border border-white/10 transition" title="Browse franchises like Marvel MCU, Batman, Star Wars & add in bulk">
+                <button onclick="openFranchiseModal()" class="hidden sm:flex px-3.5 py-2 rounded-xl bg-surface-700 hover:bg-surface-600 active:scale-95 text-gray-200 text-xs sm:text-sm font-medium items-center gap-1.5 border border-white/10 transition" title="Browse movie universes & actor filmographies to batch add">
                     <svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
                     </svg>
-                    <span>Franchises</span>
+                    <span>Franchises & Stars</span>
                 </button>
 
-                <button onclick="openAddModal()" class="px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-white text-xs sm:text-sm font-semibold flex items-center gap-1.5 shadow-lg shadow-violet-600/25 transition">
+                <button onclick="openAddModal()" class="hidden sm:flex px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover active:scale-95 text-white text-xs sm:text-sm font-semibold items-center gap-1.5 shadow-lg shadow-violet-600/25 transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
                     </svg>
                     <span>Add Entry</span>
                 </button>
 
-                <button onclick="loadFromGoogleSheet()" class="p-2 rounded-xl bg-surface-700 hover:bg-surface-600 text-gray-300 border border-white/10 transition" title="Refresh & Sync from Sheet">
-                    <svg class="w-5 h-5 text-gray-300 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button onclick="loadFromGoogleSheet()" class="p-2 sm:p-2 rounded-xl bg-surface-700 hover:bg-surface-600 active:scale-95 text-gray-300 border border-white/10 transition flex items-center gap-1.5" title="Refresh & Sync from Sheet">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5 text-gray-300 hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
                     </svg>
+                    <span class="text-xs text-gray-300 font-medium sm:hidden">Sync</span>
                 </button>
+            </div>
+        </div>
+
+        <!-- Mobile Quick Stats Ribbon (visible only on mobile) -->
+        <div class="flex md:hidden items-center justify-around py-2 px-3 bg-surface-900/70 border-t border-white/5 text-center">
+            <div class="flex-1">
+                <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Watched</span>
+                <span id="stat-total-mobile" class="font-display font-bold text-white text-xs">0</span>
+            </div>
+            <div class="h-4 w-px bg-white/10"></div>
+            <div class="flex-1">
+                <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Watch Time</span>
+                <span id="stat-hours-mobile" class="font-display font-bold text-violet-400 text-xs">0 hrs</span>
+            </div>
+            <div class="h-4 w-px bg-white/10"></div>
+            <div class="flex-1">
+                <span class="text-[10px] text-gray-400 uppercase tracking-wider block">Rewatches</span>
+                <span id="stat-rewatches-mobile" class="font-display font-bold text-emerald-400 text-xs">0</span>
             </div>
         </div>
     </header>
 
     <!-- Filter & Search Controls -->
-    <section class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 pt-6 pb-2">
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-            <!-- Category Tabs -->
-            <div class="flex flex-wrap items-center gap-2">
-                <div class="inline-flex p-1 rounded-xl bg-surface-800 border border-white/5">
-                    <button onclick="setFilter('all')" id="tab-all" class="filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white">
-                        All
-                    </button>
-                    <button onclick="setFilter('movie')" id="tab-movie" class="filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white">
-                        Movies
-                    </button>
-                    <button onclick="setFilter('series')" id="tab-series" class="filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white">
-                        Series
-                    </button>
+    <section class="max-w-7xl mx-auto w-full px-3.5 sm:px-6 lg:px-8 pt-4 sm:pt-6 pb-2">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+            <!-- Category & Industry Tabs Container -->
+            <div class="flex flex-col gap-2.5">
+                <!-- Category Tabs (All, Movies, Series) -->
+                <div class="flex items-center gap-2">
+                    <div class="inline-flex p-1 rounded-xl bg-surface-800 border border-white/5">
+                        <button onclick="setFilter('all')" id="tab-all" class="filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white active:scale-95">
+                            All
+                        </button>
+                        <button onclick="setFilter('movie')" id="tab-movie" class="filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white active:scale-95">
+                            Movies
+                        </button>
+                        <button onclick="setFilter('series')" id="tab-series" class="filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white active:scale-95">
+                            Series
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Industry / Region Category Filter -->
-                <div class="inline-flex p-1 rounded-xl bg-surface-800 border border-white/5 overflow-x-auto">
-                    <button onclick="setIndustryFilter('all')" id="ind-all" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition bg-violet-600/30 text-violet-200 border border-violet-500/30 whitespace-nowrap">
+                <!-- Industry / Region Category Filter Carousel with No-Scrollbar & Momentum Scrolling -->
+                <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5 -mx-1 px-1">
+                    <button onclick="setIndustryFilter('all')" id="ind-all" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition bg-violet-600/30 text-violet-200 border border-violet-500/30 whitespace-nowrap flex-shrink-0 active:scale-95">
                         All Industries
                     </button>
-                    <button onclick="setIndustryFilter('hollywood')" id="ind-hollywood" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap">
+                    <button onclick="setIndustryFilter('hollywood')" id="ind-hollywood" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap flex-shrink-0 active:scale-95">
                         🎬 Hollywood
                     </button>
-                    <button onclick="setIndustryFilter('bollywood')" id="ind-bollywood" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap">
+                    <button onclick="setIndustryFilter('bollywood')" id="ind-bollywood" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap flex-shrink-0 active:scale-95">
                         🇮🇳 Bollywood
                     </button>
-                    <button onclick="setIndustryFilter('south')" id="ind-south" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap">
+                    <button onclick="setIndustryFilter('south')" id="ind-south" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap flex-shrink-0 active:scale-95">
                         🌴 South Indian
                     </button>
-                    <button onclick="setIndustryFilter('anime')" id="ind-anime" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap">
-                        🇯🇵 Anime / Japanese
+                    <button onclick="setIndustryFilter('anime')" id="ind-anime" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap flex-shrink-0 active:scale-95">
+                        🇯🇵 Anime
                     </button>
-                    <button onclick="setIndustryFilter('kdrama')" id="ind-kdrama" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap">
-                        🇰🇷 K-Drama / Korean
+                    <button onclick="setIndustryFilter('kdrama')" id="ind-kdrama" class="ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap flex-shrink-0 active:scale-95">
+                        🇰🇷 K-Drama
                     </button>
                 </div>
             </div>
 
-            <!-- Search Input -->
-            <div class="relative flex-1 max-w-md">
-                <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
-                </svg>
-                <input 
-                    type="text" 
-                    id="search-input" 
-                    oninput="handleSearch(this.value)"
-                    placeholder="Filter by title, actor, or industry..." 
-                    class="w-full pl-10 pr-4 py-2 rounded-xl bg-surface-800 border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
-                >
+            <!-- Search & Sort Controls Container -->
+            <div class="flex items-center gap-2 flex-1 max-w-lg">
+                <!-- Search Input with Clear Button -->
+                <div class="relative flex-1">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                    </svg>
+                    <input 
+                        type="text" 
+                        id="search-input" 
+                        oninput="handleSearch(this.value)"
+                        placeholder="Search title, actor, or genre..." 
+                        class="w-full pl-10 pr-9 py-2 rounded-xl bg-surface-800 border border-white/10 text-base sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
+                    >
+                    <button id="search-clear-btn" onclick="clearSearch()" class="hidden absolute right-2.5 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-white/10 hover:bg-white/20 text-gray-400 hover:text-white flex items-center justify-center text-xs transition" title="Clear search">
+                        &times;
+                    </button>
+                </div>
+
+                <!-- Dynamic In-App Sort Selector -->
+                <div class="relative flex-shrink-0">
+                    <select 
+                        id="sort-select" 
+                        onchange="setSort(this.value)" 
+                        class="appearance-none pl-8 pr-7 py-2 rounded-xl bg-surface-800 border border-white/10 text-xs sm:text-sm text-gray-200 hover:text-white focus:outline-none focus:border-accent cursor-pointer transition font-medium"
+                        title="Sort watchlist"
+                    >
+                        <option value="default">Default</option>
+                        <option value="title-asc">Title (A → Z)</option>
+                        <option value="title-desc">Title (Z → A)</option>
+                        <option value="year-desc">Year (Newest)</option>
+                        <option value="year-asc">Year (Oldest)</option>
+                        <option value="rewatches-desc">Rewatches (Highest)</option>
+                        <option value="rating-desc">Rating (★ Top)</option>
+                    </select>
+                    <!-- Sort Icon (Left) -->
+                    <svg class="w-3.5 h-3.5 text-violet-400 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
+                    </svg>
+                    <!-- Caret Icon (Right) -->
+                    <svg class="w-3.5 h-3.5 text-gray-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                </div>
             </div>
         </div>
     </section>
 
     <!-- Main Minimalist Poster Grid (Poster + Title only on card front, Cast on Click) -->
-    <main class="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 flex-1">
+    <main class="max-w-7xl mx-auto w-full px-3.5 sm:px-6 lg:px-8 pt-4 pb-24 md:pb-8 flex-1">
         <!-- Status / Toast Banner -->
-        <div id="status-banner" class="hidden mb-6 p-4 rounded-xl bg-surface-800 border border-violet-500/30 text-sm text-gray-200 flex items-center justify-between">
+        <div id="status-banner" class="hidden mb-4 sm:mb-6 p-3.5 sm:p-4 rounded-xl bg-surface-800 border border-violet-500/30 text-xs sm:text-sm text-gray-200 flex items-center justify-between shadow-lg">
             <span id="status-message"></span>
-            <button onclick="hideStatus()" class="text-gray-400 hover:text-white">&times;</button>
+            <button onclick="hideStatus()" class="text-gray-400 hover:text-white p-1 text-base">&times;</button>
         </div>
 
         <!-- Grid Container -->
-        <div id="watchlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-5 sm:gap-6">
+        <div id="watchlist-grid" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3.5 sm:gap-6">
             <!-- Dynamically populated by JavaScript -->
         </div>
 
         <!-- Empty State -->
-        <div id="empty-state" class="hidden py-20 text-center">
-            <p class="text-gray-400 text-base">No matching movies or series found in your list.</p>
+        <div id="empty-state" class="hidden py-16 sm:py-20 text-center">
+            <div class="w-12 h-12 mx-auto mb-3 rounded-full bg-surface-800 flex items-center justify-center text-gray-500">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <p class="text-gray-400 text-sm sm:text-base">No matching movies or series found in your list.</p>
         </div>
     </main>
 
-    <!-- Cast & Details Modal (Opens when clicking any minimalist movie card) -->
-    <div id="details-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="glass-panel w-full max-w-3xl rounded-2xl overflow-hidden shadow-2xl border border-white/15 animate-fadeIn">
-            <div class="relative flex flex-col sm:flex-row">
+    <!-- Cast & Details Modal (Responsive Bottom-Sheet on mobile, centered dialog on desktop) -->
+    <div id="details-modal" onclick="if(event.target === this) closeDetailsModal()" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center sm:p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full sm:max-w-3xl rounded-t-3xl sm:rounded-2xl max-h-[92vh] sm:max-h-[88vh] overflow-hidden flex flex-col shadow-2xl border-t sm:border border-white/15 animate-slideUp sm:animate-fadeIn">
+            <!-- Mobile Drag Handle -->
+            <div class="w-12 h-1.5 rounded-full bg-white/25 mx-auto mt-2.5 mb-1 sm:hidden flex-shrink-0 cursor-pointer" onclick="closeDetailsModal()"></div>
+
+            <!-- Scrollable Modal Content -->
+            <div class="overflow-y-auto overscroll-contain flex-1 flex flex-col sm:flex-row">
                 <!-- Poster Column -->
-                <div class="sm:w-2/5 bg-surface-900">
-                    <img id="modal-poster" src="" alt="" class="w-full h-72 sm:h-full object-cover">
+                <div class="sm:w-2/5 bg-surface-900 flex-shrink-0 relative">
+                    <img id="modal-poster" src="" alt="" class="w-full h-52 sm:h-full object-cover">
+                    <div class="absolute inset-0 bg-gradient-to-t from-surface-900 via-surface-900/40 to-transparent sm:hidden"></div>
+                    <!-- Mobile Close Button -->
+                    <button onclick="closeDetailsModal()" class="sm:hidden absolute top-2.5 right-3 w-8 h-8 rounded-full bg-black/60 backdrop-blur-md text-white flex items-center justify-center border border-white/20 active:scale-90 transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
+
                 <!-- Info & Cast Column -->
-                <div class="sm:w-3/5 p-6 flex flex-col justify-between overflow-hidden">
+                <div class="sm:w-3/5 p-4 sm:p-6 flex flex-col justify-between">
                     <div>
                         <div class="flex items-start justify-between gap-2">
                             <div class="flex items-center gap-2 flex-wrap">
-                                <span id="modal-type" class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-violet-500/20 text-violet-300 border border-violet-500/30">
+                                <span id="modal-type" class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-violet-500/20 text-violet-300 border border-violet-500/30">
                                     MOVIE
                                 </span>
-                                <span id="modal-industry" class="text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                <span id="modal-industry" class="text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30">
                                     HOLLYWOOD
                                 </span>
+                                <span id="modal-rating-badge" class="hidden text-[10px] sm:text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/30 items-center gap-1">
+                                    ★ <span id="modal-rating">0.0</span>
+                                </span>
                             </div>
-                            <button onclick="closeDetailsModal()" class="text-gray-400 hover:text-white p-1 rounded-lg">
+                            <button onclick="closeDetailsModal()" class="hidden sm:block text-gray-400 hover:text-white p-1 rounded-lg">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                                 </svg>
                             </button>
                         </div>
 
-                        <h2 id="modal-title" class="font-display text-2xl font-bold text-white mt-2"></h2>
+                        <h2 id="modal-title" class="font-display text-xl sm:text-2xl font-bold text-white mt-2 leading-tight"></h2>
                         <p id="modal-meta" class="text-xs text-gray-400 mt-1"></p>
 
-                        <p id="modal-overview" class="text-xs sm:text-sm text-gray-300 mt-4 leading-relaxed line-clamp-3"></p>
+                        <p id="modal-overview" class="text-xs sm:text-sm text-gray-300 mt-3 leading-relaxed"></p>
 
                         <!-- IMDb / Netflix Style Top Billed Cast Carousel -->
-                        <div class="mt-6">
-                            <div class="flex items-center justify-between mb-3">
+                        <div class="mt-5">
+                            <div class="flex items-center justify-between mb-2.5">
                                 <div class="flex items-center gap-2">
-                                    <span class="w-1 h-4 rounded-full bg-amber-400"></span>
+                                    <span class="w-1 h-3.5 rounded-full bg-amber-400"></span>
                                     <h3 class="text-xs font-bold uppercase tracking-wider text-white">Top Billed Cast</h3>
                                 </div>
                                 <span class="text-[11px] text-gray-400">Click actor to filter</span>
                             </div>
-                            <div id="modal-cast" class="flex gap-3.5 overflow-x-auto pb-3 pt-1 snap-x">
+                            <div id="modal-cast" class="flex gap-2.5 sm:gap-3.5 overflow-x-auto no-scrollbar pb-2 pt-1 snap-x">
                                 <!-- Populated dynamically with circular actor avatars -->
                             </div>
                         </div>
 
                         <!-- Recommended / Similar Titles Section -->
-                        <div class="mt-6 pt-4 border-t border-white/10">
-                            <div class="flex items-center justify-between mb-3">
+                        <div class="mt-5 pt-3.5 border-t border-white/10">
+                            <div class="flex items-center justify-between mb-2.5">
                                 <div class="flex items-center gap-2">
-                                    <span class="w-1 h-4 rounded-full bg-violet-400"></span>
+                                    <span class="w-1 h-3.5 rounded-full bg-violet-400"></span>
                                     <h3 class="text-xs font-bold uppercase tracking-wider text-white">You Might Also Like</h3>
                                 </div>
                                 <span class="text-[11px] text-gray-400">Similar & Recommendations</span>
                             </div>
-                            <div id="modal-recommendations" class="flex gap-3 overflow-x-auto pb-2 snap-x">
+                            <div id="modal-recommendations" class="flex gap-2.5 overflow-x-auto no-scrollbar pb-2 snap-x">
                                 <!-- Populated dynamically -->
                             </div>
                         </div>
                     </div>
 
                     <!-- Rewatch Counter & Footer Actions with Delete Option -->
-                    <div class="mt-6 pt-4 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
-                        <div class="flex items-center gap-3">
-                            <span class="text-xs text-gray-400">Rewatch Count:</span>
-                            <div class="inline-flex items-center gap-2 bg-surface-900 px-2.5 py-1 rounded-lg border border-white/10">
-                                <button onclick="updateRewatch(-1)" class="text-gray-400 hover:text-white font-bold px-1">-</button>
-                                <span id="modal-rewatch" class="text-sm font-bold text-emerald-400">1</span>
-                                <button onclick="updateRewatch(1)" class="text-gray-400 hover:text-white font-bold px-1">+</button>
+                    <div class="mt-5 pt-3.5 border-t border-white/10 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex items-center gap-2.5">
+                            <span class="text-xs text-gray-400">Rewatches:</span>
+                            <div class="inline-flex items-center gap-2 bg-surface-900 px-2.5 py-1 rounded-xl border border-white/10">
+                                <button onclick="updateRewatch(-1)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-800 text-gray-300 hover:text-white active:scale-95 font-bold transition text-base">-</button>
+                                <span id="modal-rewatch" class="text-xs sm:text-sm font-bold text-emerald-400 min-w-[20px] text-center">1</span>
+                                <button onclick="updateRewatch(1)" class="w-7 h-7 flex items-center justify-center rounded-lg bg-surface-800 text-gray-300 hover:text-white active:scale-95 font-bold transition text-base">+</button>
                             </div>
                         </div>
-                        <div class="flex items-center gap-3">
-                            <button onclick="removeSelectedEntry()" class="px-3 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 border border-rose-500/30 text-xs font-medium transition flex items-center gap-1.5">
+                        <div class="flex items-center gap-2.5">
+                            <button onclick="removeSelectedEntry()" class="px-3 py-1.5 rounded-xl bg-rose-500/10 hover:bg-rose-500/20 active:scale-95 text-rose-400 border border-rose-500/30 text-xs font-medium transition flex items-center gap-1.5">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                                 </svg>
@@ -312,41 +411,44 @@
         </div>
     </div>
 
-    <!-- Add Movie / Series Modal -->
-    <div id="add-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="glass-panel w-full max-w-2xl rounded-2xl p-6 border border-white/15 max-h-[90vh] flex flex-col overflow-y-auto">
-            <div class="flex items-center justify-between mb-4">
+    <!-- Add Movie / Series Modal (Responsive Bottom-Sheet on mobile, centered dialog on desktop) -->
+    <div id="add-modal" onclick="if(event.target === this) closeAddModal()" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center sm:p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full sm:max-w-2xl rounded-t-3xl sm:rounded-2xl p-4 sm:p-6 border-t sm:border border-white/15 max-h-[92vh] flex flex-col overflow-y-auto overscroll-contain animate-slideUp sm:animate-fadeIn">
+            <!-- Mobile Drag Handle -->
+            <div class="w-12 h-1.5 rounded-full bg-white/25 mx-auto -mt-1 mb-2.5 sm:hidden flex-shrink-0 cursor-pointer" onclick="closeAddModal()"></div>
+
+            <div class="flex items-center justify-between mb-3.5">
                 <div>
-                    <h3 class="font-display text-lg font-bold text-white">Search & Add to Watchlist</h3>
+                    <h3 class="font-display text-base sm:text-lg font-bold text-white">Search & Add to Watchlist</h3>
                     <p class="text-xs text-gray-400">Search TMDB with real-time preview and poster confirmation</p>
                 </div>
-                <button onclick="closeAddModal()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+                <button onclick="closeAddModal()" class="text-gray-400 hover:text-white text-2xl leading-none p-1">&times;</button>
             </div>
 
             <!-- Live TMDB Search Box -->
-            <div class="mb-4">
+            <div class="mb-3.5">
                 <label class="block text-xs font-semibold uppercase tracking-wider text-violet-400 mb-1.5">1. Search Movie or Series</label>
                 <div class="relative">
-                    <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-4 h-4 text-gray-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                     </svg>
                     <input 
                         type="text" 
                         id="tmdb-search-query" 
                         oninput="debouncedTmdbSearch(this.value)"
-                        placeholder="Type title (e.g. Oppenheimer, Stranger Things, Jawan, Inception)..." 
-                        class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-900 border border-white/15 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
+                        placeholder="Type title (e.g. Oppenheimer, Stranger Things)..." 
+                        class="w-full pl-10 pr-4 py-2.5 rounded-xl bg-surface-900 border border-white/15 text-base sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
                     >
                 </div>
                 <!-- Search Results Dropdown List -->
-                <div id="tmdb-search-results" class="mt-2 max-h-64 overflow-y-auto space-y-2 hidden pr-1">
+                <div id="tmdb-search-results" class="mt-2 max-h-56 sm:max-h-64 overflow-y-auto space-y-1.5 hidden pr-1">
                     <!-- Dynamically populated search results -->
                 </div>
             </div>
 
             <!-- Selected Movie Confirmation Preview Box -->
-            <div id="add-preview-card" class="hidden mb-4 p-4 rounded-xl bg-surface-900/90 border border-violet-500/30 flex gap-4 items-center">
-                <img id="add-preview-poster" src="" alt="Poster" class="w-16 h-24 rounded-lg object-cover bg-surface-800 flex-shrink-0 border border-white/10">
+            <div id="add-preview-card" class="hidden mb-3.5 p-3 rounded-xl bg-surface-900/90 border border-violet-500/30 flex gap-3.5 items-center">
+                <img id="add-preview-poster" src="" alt="Poster" class="w-14 h-20 sm:w-16 sm:h-24 rounded-lg object-cover bg-surface-800 flex-shrink-0 border border-white/10">
                 <div class="flex-1 min-w-0">
                     <div class="flex items-center gap-2 flex-wrap">
                         <span id="add-preview-type" class="uppercase text-[10px] font-bold px-2 py-0.5 rounded bg-violet-500/20 text-violet-300">MOVIE</span>
@@ -358,101 +460,235 @@
                 </div>
             </div>
 
-            <hr class="border-white/10 my-2">
+            <hr class="border-white/10 my-1">
 
             <!-- Selected / Manual Entry Form -->
-            <form onsubmit="handleAddEntry(event)" class="space-y-4 pt-2">
+            <form onsubmit="handleAddEntry(event)" class="space-y-3 pt-2">
                 <label class="block text-xs font-semibold uppercase tracking-wider text-emerald-400">2. Confirm Details</label>
                 <div>
                     <label class="block text-xs font-medium text-gray-300 mb-1">Title</label>
-                    <input type="text" id="input-title" required placeholder="Select a title from search above or type here..." class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
+                    <input type="text" id="input-title" required placeholder="Select a title from search above or type here..." class="w-full px-3.5 py-2.5 rounded-xl bg-surface-900 border border-white/10 text-base sm:text-sm text-white focus:outline-none focus:border-accent">
                 </div>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="block text-xs font-medium text-gray-300 mb-1">TMDB ID</label>
-                        <input type="number" id="input-tmdb-id" required placeholder="Auto-filled ID" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white font-mono focus:outline-none focus:border-accent">
+                        <input type="number" id="input-tmdb-id" required placeholder="Auto-filled ID" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-900 border border-white/10 text-base sm:text-sm text-white font-mono focus:outline-none focus:border-accent">
                     </div>
                     <div>
                         <label class="block text-xs font-medium text-gray-300 mb-1">Type</label>
-                        <select id="input-type" class="w-full px-3.5 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white focus:outline-none focus:border-accent">
+                        <select id="input-type" class="w-full px-3.5 py-2.5 rounded-xl bg-surface-900 border border-white/10 text-base sm:text-sm text-white focus:outline-none focus:border-accent">
                             <option value="movie">Movie</option>
                             <option value="series">Series (TV)</option>
                         </select>
                     </div>
                 </div>
-                <div class="flex justify-end gap-2 pt-2">
-                    <button type="button" onclick="closeAddModal()" class="px-4 py-2 rounded-xl bg-surface-700 text-xs font-medium text-gray-300 hover:text-white">Cancel</button>
-                    <button type="submit" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white shadow-lg shadow-violet-600/25">Add to Watchlist & Sheet</button>
+                <div class="flex justify-end gap-2 pt-2 pb-safe sm:pb-0">
+                    <button type="button" onclick="closeAddModal()" class="px-4 py-2.5 rounded-xl bg-surface-700 text-xs font-medium text-gray-300 hover:text-white active:scale-95 transition">Cancel</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white shadow-lg shadow-violet-600/25 active:scale-95 transition">Add to Watchlist & Sheet</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Franchise & Universe Batch Explorer Modal -->
-    <div id="franchise-modal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
-        <div class="glass-panel w-full max-w-4xl rounded-2xl p-6 border border-white/15 max-h-[90vh] flex flex-col">
-            <div class="flex items-center justify-between mb-4">
+    <!-- Franchise & Universe Batch Explorer Modal (Responsive Bottom-Sheet on mobile, centered dialog on desktop) -->
+    <div id="franchise-modal" onclick="if(event.target === this) closeFranchiseModal()" class="fixed inset-0 z-50 hidden items-end sm:items-center justify-center sm:p-4 bg-black/80 backdrop-blur-sm">
+        <div class="glass-panel w-full sm:max-w-4xl rounded-t-3xl sm:rounded-2xl p-4 sm:p-6 border-t sm:border border-white/15 max-h-[92vh] flex flex-col overflow-hidden animate-slideUp sm:animate-fadeIn">
+            <!-- Mobile Drag Handle -->
+            <div class="w-12 h-1.5 rounded-full bg-white/25 mx-auto -mt-1 mb-2.5 sm:hidden flex-shrink-0 cursor-pointer" onclick="closeFranchiseModal()"></div>
+
+            <div class="flex items-center justify-between mb-3">
                 <div>
-                    <h3 class="font-display text-lg font-bold text-white flex items-center gap-2">
-                        <span>Franchise & Universe Batch Explorer</span>
-                        <span class="text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30">Batch Add</span>
+                    <h3 class="font-display text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                        <span>Franchise & Star Filmography Explorer</span>
+                        <span class="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/30 font-semibold">Batch Add</span>
                     </h3>
-                    <p class="text-xs text-gray-400">Select popular movie universes or search any franchise, check what you have watched, and add them all in one click</p>
+                    <p class="text-[11px] sm:text-xs text-gray-400">Explore movie universes or search any actor/director to batch add titles</p>
                 </div>
-                <button onclick="closeFranchiseModal()" class="text-gray-400 hover:text-white text-2xl leading-none">&times;</button>
+                <button onclick="closeFranchiseModal()" class="text-gray-400 hover:text-white text-2xl leading-none p-1">&times;</button>
             </div>
 
-            <!-- Universe Quick Preset Pills -->
-            <div class="flex flex-wrap items-center gap-2 mb-4">
-                <span class="text-xs text-gray-400 font-medium">Popular:</span>
-                <button type="button" onclick="loadUniverse('mcu')" class="px-3 py-1 rounded-lg text-xs font-medium bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600 hover:text-white transition">🦸 Marvel (MCU)</button>
-                <button type="button" onclick="loadUniverse('batman')" class="px-3 py-1 rounded-lg text-xs font-medium bg-sky-600/20 text-sky-300 border border-sky-500/30 hover:bg-sky-600 hover:text-white transition">🦇 Batman / DC</button>
-                <button type="button" onclick="loadUniverse('starwars')" class="px-3 py-1 rounded-lg text-xs font-medium bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600 hover:text-white transition">✨ Star Wars</button>
-                <button type="button" onclick="loadUniverse('harrypotter')" class="px-3 py-1 rounded-lg text-xs font-medium bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white transition">⚡ Harry Potter</button>
-                <button type="button" onclick="loadUniverse('lotr')" class="px-3 py-1 rounded-lg text-xs font-medium bg-yellow-600/20 text-yellow-300 border border-yellow-500/30 hover:bg-yellow-600 hover:text-white transition">💍 Lord of the Rings</button>
-                <button type="button" onclick="loadUniverse('fast')" class="px-3 py-1 rounded-lg text-xs font-medium bg-violet-600/20 text-violet-300 border border-violet-500/30 hover:bg-violet-600 hover:text-white transition">🏎️ Fast & Furious</button>
-            </div>
-
-            <!-- Search any other franchise -->
-            <div class="relative mb-4">
-                <input 
-                    type="text" 
-                    id="franchise-search-input" 
-                    placeholder="Or type any franchise / director (e.g., Mission Impossible, Spider-Man, Christopher Nolan, Pixar)..." 
-                    onkeydown="if(event.key === 'Enter') searchFranchiseCollection(this.value)"
-                    class="w-full pl-4 pr-24 py-2 rounded-xl bg-surface-900 border border-white/10 text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
-                >
-                <button 
-                    type="button" 
-                    onclick="searchFranchiseCollection(document.getElementById('franchise-search-input').value)" 
-                    class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-semibold transition"
-                >
-                    Search
+            <!-- Mode Tabs: Franchises vs Search by Actor -->
+            <div class="flex items-center gap-1.5 mb-3 bg-surface-900/90 p-1 rounded-xl border border-white/10">
+                <button type="button" id="tab-btn-franchise" onclick="switchBatchTab('franchise')" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition bg-violet-600 text-white shadow">
+                    <span>🏛️ Franchises & Universes</span>
+                </button>
+                <button type="button" id="tab-btn-actor" onclick="switchBatchTab('actor')" class="flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition text-gray-400 hover:text-white">
+                    <span>🎭 Search by Actor / Star</span>
                 </button>
             </div>
 
-            <!-- Franchise Items Grid -->
-            <div id="franchise-results-container" class="flex-1 overflow-y-auto pr-1 min-h-[220px]">
+            <!-- TAB 1: FRANCHISE SECTION -->
+            <div id="batch-section-franchise">
+                <!-- Universe Quick Preset Pills with Horizontal Momentum Scrolling on Mobile -->
+                <div class="flex items-center gap-1.5 mb-3 overflow-x-auto no-scrollbar pb-1 flex-nowrap sm:flex-wrap">
+                    <span class="text-xs text-gray-400 font-medium whitespace-nowrap hidden sm:inline">Popular:</span>
+                    <button type="button" onclick="loadUniverse('mcu')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">🦸 MCU</button>
+                    <button type="button" onclick="loadUniverse('batman')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-sky-600/20 text-sky-300 border border-sky-500/30 hover:bg-sky-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">🦇 Batman</button>
+                    <button type="button" onclick="loadUniverse('starwars')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">✨ Star Wars</button>
+                    <button type="button" onclick="loadUniverse('harrypotter')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">⚡ Harry Potter</button>
+                    <button type="button" onclick="loadUniverse('lotr')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-yellow-600/20 text-yellow-300 border border-yellow-500/30 hover:bg-yellow-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">💍 LOTR</button>
+                    <button type="button" onclick="loadUniverse('fast')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-violet-600/20 text-violet-300 border border-violet-500/30 hover:bg-violet-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">🏎️ Fast & Furious</button>
+                </div>
+
+                <!-- Search any other franchise -->
+                <div class="relative mb-3">
+                    <input 
+                        type="text" 
+                        id="franchise-search-input" 
+                        placeholder="Search franchise (e.g. Spider-Man, Matrix, Nolan)..." 
+                        onkeydown="if(event.key === 'Enter') searchFranchiseCollection(this.value)"
+                        class="w-full pl-3.5 pr-20 py-2 rounded-xl bg-surface-900 border border-white/10 text-base sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
+                    >
+                    <button 
+                        type="button" 
+                        onclick="searchFranchiseCollection(document.getElementById('franchise-search-input').value)" 
+                        class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-semibold transition active:scale-95"
+                    >
+                        Search
+                    </button>
+                </div>
+            </div>
+
+            <!-- TAB 2: ACTOR & STAR FILMOGRAPHY SECTION -->
+            <div id="batch-section-actor" class="hidden">
+                <!-- Star Quick Preset Pills -->
+                <div class="flex items-center gap-1.5 mb-2.5 overflow-x-auto no-scrollbar pb-1 flex-nowrap sm:flex-wrap">
+                    <span class="text-xs text-gray-400 font-medium whitespace-nowrap hidden sm:inline">Stars:</span>
+                    <button type="button" onclick="loadPresetActor(6193, 'Leonardo DiCaprio')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-amber-600/20 text-amber-300 border border-amber-500/30 hover:bg-amber-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">👑 Leo DiCaprio</button>
+                    <button type="button" onclick="loadPresetActor(2037, 'Cillian Murphy')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-sky-600/20 text-sky-300 border border-sky-500/30 hover:bg-sky-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">🎩 Cillian Murphy</button>
+                    <button type="button" onclick="loadPresetActor(500, 'Tom Cruise')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-red-600/20 text-red-300 border border-red-500/30 hover:bg-red-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">🕶️ Tom Cruise</button>
+                    <button type="button" onclick="loadPresetActor(3894, 'Christian Bale')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-indigo-600/20 text-indigo-300 border border-indigo-500/30 hover:bg-indigo-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">🦇 Christian Bale</button>
+                    <button type="button" onclick="loadPresetActor(234352, 'Margot Robbie')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-pink-600/20 text-pink-300 border border-pink-500/30 hover:bg-pink-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">🌟 Margot Robbie</button>
+                    <button type="button" onclick="loadPresetActor(35742, 'Shah Rukh Khan')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-emerald-600/20 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">🦁 Shah Rukh Khan</button>
+                    <button type="button" onclick="loadPresetActor(1190668, 'Timothée Chalamet')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-orange-600/20 text-orange-300 border border-orange-500/30 hover:bg-orange-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">🪐 Timothée Chalamet</button>
+                    <button type="button" onclick="loadPresetActor(6384, 'Keanu Reeves')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-purple-600/20 text-purple-300 border border-purple-500/30 hover:bg-purple-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">🔫 Keanu Reeves</button>
+                    <button type="button" onclick="loadPresetActor(525, 'Christopher Nolan')" class="px-2.5 sm:px-3 py-1 rounded-lg text-xs font-medium bg-teal-600/20 text-teal-300 border border-teal-500/30 hover:bg-teal-600 hover:text-white active:scale-95 transition whitespace-nowrap flex-shrink-0">🎬 Christopher Nolan</button>
+                </div>
+
+                <!-- Search any actor input -->
+                <div class="relative mb-2">
+                    <input 
+                        type="text" 
+                        id="actor-search-input" 
+                        placeholder="Search actor or star (e.g. Brad Pitt, Zendaya, Robert De Niro)..." 
+                        onkeydown="if(event.key === 'Enter') searchActorFilmography(this.value)"
+                        class="w-full pl-3.5 pr-20 py-2 rounded-xl bg-surface-900 border border-white/10 text-base sm:text-sm text-white placeholder-gray-500 focus:outline-none focus:border-accent"
+                    >
+                    <button 
+                        type="button" 
+                        onclick="searchActorFilmography(document.getElementById('actor-search-input').value)" 
+                        class="absolute right-1.5 top-1/2 -translate-y-1/2 px-3 py-1 rounded-lg bg-accent hover:bg-accent-hover text-white text-xs font-semibold transition active:scale-95"
+                    >
+                        Search
+                    </button>
+                </div>
+
+                <!-- Multiple Matching Actors Carousel / Row -->
+                <div id="actor-matches-container" class="hidden mb-2 overflow-x-auto no-scrollbar pb-1"></div>
+
+                <!-- Loaded Actor Banner / Filters -->
+                <div id="actor-profile-banner" class="hidden mb-2 p-2 rounded-xl bg-surface-900/80 border border-white/10 flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex items-center gap-2.5">
+                        <img id="actor-banner-avatar" src="" alt="Actor" class="w-8 h-8 rounded-full object-cover border border-violet-500/40">
+                        <div>
+                            <div class="flex items-center gap-1.5">
+                                <h4 id="actor-banner-name" class="text-xs sm:text-sm font-bold text-white"></h4>
+                                <span id="actor-banner-dept" class="text-[9px] px-1.5 py-0.2 rounded bg-violet-600/30 text-violet-300 border border-violet-500/30">Acting</span>
+                            </div>
+                            <p id="actor-banner-meta" class="text-[10px] text-gray-400"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 text-xs">
+                        <!-- Media Filter -->
+                        <div class="flex items-center rounded-lg bg-surface-800 p-0.5 border border-white/10 text-[10px]">
+                            <button type="button" id="actor-filter-all" onclick="filterActorMediaType('all')" class="px-2 py-0.5 rounded font-medium bg-violet-600 text-white">All</button>
+                            <button type="button" id="actor-filter-movie" onclick="filterActorMediaType('movie')" class="px-2 py-0.5 rounded font-medium text-gray-400 hover:text-white">Movies</button>
+                            <button type="button" id="actor-filter-tv" onclick="filterActorMediaType('tv')" class="px-2 py-0.5 rounded font-medium text-gray-400 hover:text-white">TV</button>
+                        </div>
+                        <!-- Sort Filter -->
+                        <select id="actor-sort-select" onchange="sortActorFilmography(this.value)" class="text-[10px] px-2 py-1 rounded-lg bg-surface-800 border border-white/10 text-gray-300 focus:outline-none focus:border-accent">
+                            <option value="popularity">🔥 Popular</option>
+                            <option value="year-desc">📅 Newest</option>
+                            <option value="year-asc">📅 Oldest</option>
+                            <option value="rating">⭐ Rating</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grid Header & Quick Selection Actions Toolbar -->
+            <div id="batch-grid-toolbar" class="flex items-center justify-between mb-2 text-xs text-gray-400 px-0.5">
+                <span id="batch-grid-title" class="text-[11px] text-gray-400 truncate">Choose a preset or search to view titles</span>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                    <button type="button" onclick="selectAllFranchiseItems()" class="text-[10px] px-2 py-0.5 rounded bg-surface-700 hover:bg-surface-600 text-gray-200 border border-white/10 transition active:scale-95">Select All</button>
+                    <button type="button" onclick="deselectAllFranchiseItems()" class="text-[10px] px-2 py-0.5 rounded bg-surface-700 hover:bg-surface-600 text-gray-200 border border-white/10 transition active:scale-95">Clear All</button>
+                </div>
+            </div>
+
+            <!-- Franchise & Actor Results Grid -->
+            <div id="franchise-results-container" class="flex-1 overflow-y-auto overscroll-contain pr-1 min-h-[220px]">
                 <div class="text-center py-10 text-gray-500 text-xs">
-                    Choose a universe preset above or search any collection to view titles.
+                    Choose a preset above or search any collection / actor to view titles.
                 </div>
             </div>
 
             <!-- Franchise Bottom Action Bar -->
-            <div class="mt-4 pt-3 border-t border-white/10 flex items-center justify-between">
+            <div class="mt-3 pt-3 border-t border-white/10 flex items-center justify-between gap-2 pb-safe sm:pb-0">
                 <div class="text-xs text-gray-400">
-                    Selected: <span id="franchise-selected-count" class="font-bold text-violet-400">0</span> unwatched titles to add
+                    Selected: <span id="franchise-selected-count" class="font-bold text-violet-400">0</span>
                 </div>
                 <div class="flex gap-2">
-                    <button type="button" onclick="closeFranchiseModal()" class="px-4 py-2 rounded-xl bg-surface-700 text-xs font-medium text-gray-300 hover:text-white">Cancel</button>
-                    <button type="button" id="btn-batch-add" onclick="batchAddSelectedFranchise()" class="px-5 py-2 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white shadow-lg shadow-violet-600/25">Add Selected to Watchlist</button>
+                    <button type="button" onclick="closeFranchiseModal()" class="px-3.5 py-2 rounded-xl bg-surface-700 text-xs font-medium text-gray-300 hover:text-white active:scale-95 transition">Cancel</button>
+                    <button type="button" id="btn-batch-add" onclick="batchAddSelectedFranchise()" class="px-4 py-2 rounded-xl bg-accent hover:bg-accent-hover text-xs font-semibold text-white shadow-lg shadow-violet-600/25 active:scale-95 transition">Add Selected</button>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Mobile Bottom Navigation Bar (Thumb Zone) -->
+    <nav class="fixed bottom-0 inset-x-0 z-40 bg-surface-900/95 backdrop-blur-xl border-t border-white/10 px-3 py-1.5 flex items-center justify-around md:hidden pb-safe shadow-2xl">
+        <!-- Watchlist Home -->
+        <button onclick="scrollToTopAndReset();" class="flex flex-col items-center justify-center p-1.5 text-gray-400 hover:text-violet-400 active:text-violet-400 transition active:scale-90" title="Watchlist">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z"></path>
+            </svg>
+            <span class="text-[10px] font-medium mt-0.5">Watchlist</span>
+        </button>
+
+        <!-- Search / Filter -->
+        <button onclick="focusSearch();" class="flex flex-col items-center justify-center p-1.5 text-gray-400 hover:text-violet-400 active:text-violet-400 transition active:scale-90" title="Search">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+            <span class="text-[10px] font-medium mt-0.5">Search</span>
+        </button>
+
+        <!-- Center Floating Add Button (FAB) -->
+        <button onclick="openAddModal();" class="w-12 h-12 -mt-5 rounded-full bg-gradient-to-tr from-violet-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-violet-600/40 border-2 border-surface-900 active:scale-95 transition" title="Add Title">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+            </svg>
+        </button>
+
+        <!-- Franchise & Stars Batch Explorer -->
+        <button onclick="openFranchiseModal();" class="flex flex-col items-center justify-center p-1.5 text-gray-400 hover:text-amber-400 active:text-amber-400 transition active:scale-90" title="Franchises & Stars">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
+            </svg>
+            <span class="text-[10px] font-medium mt-0.5">Explore</span>
+        </button>
+
+        <!-- Surprise Me -->
+        <button onclick="pickRandomWatched();" class="flex flex-col items-center justify-center p-1.5 text-gray-400 hover:text-violet-400 active:text-violet-400 transition active:scale-90" title="Surprise Me">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z"></path>
+            </svg>
+            <span class="text-[10px] font-medium mt-0.5">Random</span>
+        </button>
+    </nav>
+
     <!-- Required TMDB Attribution Footer -->
-    <footer class="border-t border-white/5 py-6 mt-12 text-center text-xs text-gray-500">
+    <footer class="border-t border-white/5 py-6 mt-8 mb-16 md:mb-0 text-center text-xs text-gray-500">
         <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
             <p>Built for Edge Cloud (Deno Deploy / Static HTML) &bull; Vanilla JS + Google Sheets</p>
             <p>This product uses the TMDB API but is not endorsed or certified by TMDB.</p>
@@ -471,6 +707,7 @@
                 industry: "hollywood",
                 industryLabel: "Hollywood",
                 rewatches: 3,
+                rating: 8.4,
                 year: "2010",
                 runtime: 148,
                 poster: "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg",
@@ -489,6 +726,7 @@
                 industry: "hollywood",
                 industryLabel: "Hollywood",
                 rewatches: 4,
+                rating: 8.4,
                 year: "2014",
                 runtime: 169,
                 poster: "https://image.tmdb.org/t/p/w500/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
@@ -506,6 +744,7 @@
                 industry: "hollywood",
                 industryLabel: "Hollywood",
                 rewatches: 2,
+                rating: 8.9,
                 year: "2008",
                 runtime: 450,
                 poster: "https://image.tmdb.org/t/p/w500/ztkUQFLlC19CCMYHW9o1zWhJRNq.jpg",
@@ -524,6 +763,7 @@
                 tmdb_id: 872585,
                 type: "movie",
                 year: "2023",
+                rating: 8.1,
                 runtime: 181,
                 poster: "https://image.tmdb.org/t/p/w500/8Gxv8gSFCU0XGDykEGv7zR1n2ua.jpg",
                 overview: "The story of J. Robert Oppenheimer's role in the development of the atomic bomb during World War II.",
@@ -534,6 +774,7 @@
                 tmdb_id: 66732,
                 type: "series",
                 year: "2016",
+                rating: 8.6,
                 runtime: 340,
                 poster: "https://image.tmdb.org/t/p/w500/49WJfeN0moxb9IPfGn8AIqMGskD.jpg",
                 overview: "A young boy vanishes, and a small town uncovers a mystery involving secret experiments and supernatural forces.",
@@ -609,13 +850,28 @@
             items: [],
             activeFilter: 'all',
             activeIndustry: 'all',
+            activeSort: 'default',
             searchQuery: '',
             selectedIndex: null,
             tmdbKey: DEFAULT_TMDB_KEY,
             sheetUrl: DEFAULT_SHEET_URL,
             franchiseItems: [],
-            selectedFranchiseIds: new Set()
+            selectedFranchiseIds: new Set(),
+            batchTab: 'franchise',
+            currentActor: null,
+            rawActorCredits: [],
+            actorMediaTypeFilter: 'all',
+            actorSortFilter: 'popularity'
         };
+
+        // Cache persistence helper
+        function persistWatchlistCache() {
+            try {
+                localStorage.setItem('cinetrack_full_watchlist_v2', JSON.stringify(state.items));
+            } catch (e) {
+                console.warn("Storage quota limit reached for watchlist cache:", e);
+            }
+        }
 
         // Resilient TMDB fetcher that tries both api.tmdb.org and api.themoviedb.org
         async function fetchTmdbApi(pathWithQuery) {
@@ -672,9 +928,34 @@
             const badge = document.getElementById('mode-badge');
             if (badge) {
                 badge.textContent = "Live Synced";
-                badge.className = "text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
+                badge.className = "text-[10px] sm:text-[11px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30";
             }
+
+            // 1. Instant 0ms Load: Read previously cached watchlist immediately from localStorage
+            try {
+                const cached = localStorage.getItem('cinetrack_full_watchlist_v2');
+                if (cached) {
+                    const parsed = JSON.parse(cached);
+                    if (Array.isArray(parsed) && parsed.length > 0) {
+                        state.items = parsed;
+                        renderAll();
+                    }
+                }
+            } catch (e) {
+                console.warn("Could not load cached items:", e);
+            }
+
+            // 2. Background Revalidation: Sync with Google Sheet & TMDB
             await loadFromGoogleSheet();
+        }
+
+        // Prevent background scrolling on mobile when modal/bottom sheet is open
+        function lockBodyScroll(lock) {
+            if (lock) {
+                document.body.classList.add('overflow-hidden');
+            } else {
+                document.body.classList.remove('overflow-hidden');
+            }
         }
 
         // Safe Modal Opening and Details Rendering (Prevents setting property of null)
@@ -700,10 +981,26 @@
             setElText('modal-type', (item.type || 'movie').toUpperCase());
             setElText('modal-industry', (item.industryLabel || 'Hollywood').toUpperCase());
             setElText('modal-title', item.title || 'Untitled');
-            setElText('modal-meta', `${item.year || ''} • ~${item.runtime || 120} mins`);
+            const ratingMeta = item.rating ? ` • ★ ${item.rating}/10` : '';
+            setElText('modal-meta', `${item.year || ''} • ~${item.runtime || 120} mins${ratingMeta}`);
             setElText('modal-overview', item.overview || 'No description available.');
             setElText('modal-rewatch', item.rewatches || 1);
             setElText('modal-tmdb-id', `TMDB #${item.tmdb_id || ''}`);
+
+            const ratingBadge = document.getElementById('modal-rating-badge');
+            const ratingEl = document.getElementById('modal-rating');
+            if (item.rating) {
+                if (ratingEl) ratingEl.textContent = item.rating;
+                if (ratingBadge) {
+                    ratingBadge.classList.remove('hidden');
+                    ratingBadge.classList.add('flex');
+                }
+            } else {
+                if (ratingBadge) {
+                    ratingBadge.classList.add('hidden');
+                    ratingBadge.classList.remove('flex');
+                }
+            }
 
             const castContainer = document.getElementById('modal-cast');
             if (castContainer) {
@@ -714,10 +1011,10 @@
                     const card = document.createElement('button');
                     card.type = 'button';
                     card.onclick = () => filterByActor(actor.name);
-                    card.className = "group/actor flex-shrink-0 w-24 sm:w-28 snap-start bg-surface-900/90 hover:bg-surface-700/80 p-2.5 rounded-xl border border-white/5 hover:border-violet-500/40 transition flex flex-col items-center text-center";
+                    card.className = "group/actor flex-shrink-0 w-20 sm:w-28 snap-start bg-surface-900/90 hover:bg-surface-700/80 active:scale-95 p-2 sm:p-2.5 rounded-xl border border-white/5 hover:border-violet-500/40 transition flex flex-col items-center text-center";
                     card.title = `Filter watchlist by ${actor.name}`;
                     card.innerHTML = `
-                        <div class="w-16 h-16 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-surface-800 border-2 border-white/10 group-hover/actor:border-violet-400 transition shadow-md mb-2">
+                        <div class="w-14 h-14 sm:w-20 sm:h-20 rounded-full overflow-hidden bg-surface-800 border-2 border-white/10 group-hover/actor:border-violet-400 transition shadow-md mb-1.5 sm:mb-2">
                             <img 
                                 src="${avatarSrc}" 
                                 alt="${actor.name}" 
@@ -725,8 +1022,8 @@
                                 class="w-full h-full object-cover group-hover/actor:scale-105 transition duration-300"
                             >
                         </div>
-                        <span class="text-xs font-semibold text-white group-hover/actor:text-violet-300 transition line-clamp-1 w-full">${actor.name}</span>
-                        <span class="text-[11px] text-gray-400 line-clamp-1 w-full mt-0.5">${actor.role || 'Cast'}</span>
+                        <span class="text-[11px] sm:text-xs font-semibold text-white group-hover/actor:text-violet-300 transition line-clamp-1 w-full">${actor.name}</span>
+                        <span class="text-[10px] sm:text-[11px] text-gray-400 line-clamp-1 w-full mt-0.5">${actor.role || 'Cast'}</span>
                     `;
                     castContainer.appendChild(card);
                 });
@@ -742,7 +1039,7 @@
 
                 sims.forEach(sim => {
                     const simCard = document.createElement('div');
-                    simCard.className = "flex-shrink-0 w-28 bg-surface-900/90 rounded-xl overflow-hidden border border-white/5 p-2 flex flex-col justify-between group/sim";
+                    simCard.className = "flex-shrink-0 w-24 sm:w-28 bg-surface-900/90 rounded-xl overflow-hidden border border-white/5 p-2 flex flex-col justify-between group/sim";
                     simCard.innerHTML = `
                         <div>
                             <div class="aspect-[2/3] w-full rounded-lg overflow-hidden bg-surface-800 mb-1.5">
@@ -750,7 +1047,7 @@
                             </div>
                             <h4 class="text-[11px] font-medium text-white truncate">${sim.title}</h4>
                         </div>
-                        <button type="button" onclick='quickAddSimilar(${JSON.stringify(sim).replace(/'/g, "&apos;")})' class="mt-2 w-full py-1 rounded bg-violet-600/20 hover:bg-violet-600 text-violet-300 hover:text-white text-[10px] font-semibold transition border border-violet-500/30">
+                        <button type="button" onclick='quickAddSimilar(${JSON.stringify(sim).replace(/'/g, "&apos;")})' class="mt-2 w-full py-1 rounded bg-violet-600/20 hover:bg-violet-600 active:scale-95 text-violet-300 hover:text-white text-[10px] font-semibold transition border border-violet-500/30">
                             + Add
                         </button>
                     `;
@@ -760,6 +1057,7 @@
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
+            lockBodyScroll(true);
         }
 
         function pickRandomWatched() {
@@ -777,6 +1075,7 @@
             if (!m) return;
             m.classList.remove('hidden');
             m.classList.add('flex');
+            lockBodyScroll(true);
             const searchInput = document.getElementById('tmdb-search-query');
             if (searchInput) {
                 setTimeout(() => searchInput.focus(), 60);
@@ -788,6 +1087,7 @@
             if (!m) return;
             m.classList.add('hidden');
             m.classList.remove('flex');
+            lockBodyScroll(false);
             const results = document.getElementById('tmdb-search-results');
             if (results) results.classList.add('hidden');
             const previewCard = document.getElementById('add-preview-card');
@@ -797,15 +1097,29 @@
         }
 
         // ============================================================================
-        // FRANCHISE EXPLORER MODAL & BATCH ADDING
+        // FRANCHISE & ACTOR FILMOGRAPHY BATCH EXPLORER
         // ============================================================================
-        function openFranchiseModal() {
+        function openFranchiseModal(defaultTab) {
             const m = document.getElementById('franchise-modal');
             if (!m) return;
             m.classList.remove('hidden');
             m.classList.add('flex');
+            lockBodyScroll(true);
+
+            if (defaultTab) {
+                switchBatchTab(defaultTab);
+            } else if (state.batchTab) {
+                switchBatchTab(state.batchTab);
+            } else {
+                switchBatchTab('franchise');
+            }
+
             if (!state.franchiseItems || state.franchiseItems.length === 0) {
-                loadUniverse('mcu');
+                if (state.batchTab === 'actor') {
+                    loadPresetActor(6193, 'Leonardo DiCaprio');
+                } else {
+                    loadUniverse('mcu');
+                }
             }
         }
 
@@ -814,12 +1128,55 @@
             if (!m) return;
             m.classList.add('hidden');
             m.classList.remove('flex');
+            lockBodyScroll(false);
+        }
+
+        function switchBatchTab(tab) {
+            state.batchTab = tab;
+            const tabFranchise = document.getElementById('tab-btn-franchise');
+            const tabActor = document.getElementById('tab-btn-actor');
+            const secFranchise = document.getElementById('batch-section-franchise');
+            const secActor = document.getElementById('batch-section-actor');
+
+            if (tab === 'actor') {
+                if (tabFranchise) tabFranchise.className = "flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition text-gray-400 hover:text-white";
+                if (tabActor) tabActor.className = "flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition bg-violet-600 text-white shadow";
+                if (secFranchise) secFranchise.classList.add('hidden');
+                if (secActor) secActor.classList.remove('hidden');
+
+                if (!state.currentActor && (!state.franchiseItems || state.franchiseItems.length === 0)) {
+                    loadPresetActor(6193, 'Leonardo DiCaprio');
+                }
+            } else {
+                if (tabFranchise) tabFranchise.className = "flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition bg-violet-600 text-white shadow";
+                if (tabActor) tabActor.className = "flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition text-gray-400 hover:text-white";
+                if (secFranchise) secFranchise.classList.remove('hidden');
+                if (secActor) secActor.classList.add('hidden');
+
+                if (!state.franchiseItems || state.franchiseItems.length === 0) {
+                    loadUniverse('mcu');
+                }
+            }
         }
 
         function loadUniverse(key) {
             const list = FRANCHISE_PRESETS[key] || [];
             state.franchiseItems = [...list];
             state.selectedFranchiseIds.clear();
+
+            const titleEl = document.getElementById('batch-grid-title');
+            if (titleEl) {
+                const universeNames = {
+                    mcu: 'Marvel Cinematic Universe (MCU)',
+                    batman: 'Batman Universe',
+                    starwars: 'Star Wars Saga',
+                    harrypotter: 'Harry Potter & Wizarding World',
+                    lotr: 'The Lord of the Rings & Hobbit',
+                    fast: 'Fast & Furious Franchise'
+                };
+                titleEl.textContent = `${universeNames[key] || 'Franchise'} (${list.length} titles)`;
+            }
+
             renderFranchiseGrid();
         }
 
@@ -827,11 +1184,16 @@
             if (!query || query.trim().length < 2) return;
             const container = document.getElementById('franchise-results-container');
             if (container) {
-                container.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs">Searching franchise collections for "${query}"...</div>`;
+                container.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-4 w-4 text-violet-400" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    Searching franchise collections for "${query}"...
+                </div>`;
             }
 
             try {
-                // Search collections with resilient fetcher
                 const data = await fetchTmdbApi(`/search/collection?query=${encodeURIComponent(query)}`);
                 
                 if (data && data.results && data.results.length > 0) {
@@ -844,11 +1206,11 @@
                             title: p.title,
                             type: 'movie',
                             year: (p.release_date || '').split('-')[0] || 'N/A',
-                            poster: p.poster_path ? `${PROFILE_BASE_URL}${p.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster'
+                            poster: p.poster_path ? `${PROFILE_BASE_URL}${p.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster',
+                            rating: p.vote_average ? Number(p.vote_average).toFixed(1) : null
                         })).sort((a,b) => (a.year > b.year ? 1 : -1));
                     }
                 } else {
-                    // Fallback to multi-search
                     const mData = await fetchTmdbApi(`/search/multi?query=${encodeURIComponent(query)}`);
                     state.franchiseItems = (mData && mData.results ? mData.results : [])
                         .filter(r => r.media_type === 'movie' || r.media_type === 'tv')
@@ -857,10 +1219,16 @@
                             title: r.title || r.name,
                             type: r.media_type === 'tv' ? 'series' : 'movie',
                             year: (r.release_date || r.first_air_date || '').split('-')[0] || 'N/A',
-                            poster: r.poster_path ? `${PROFILE_BASE_URL}${r.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster'
+                            poster: r.poster_path ? `${PROFILE_BASE_URL}${r.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster',
+                            rating: r.vote_average ? Number(r.vote_average).toFixed(1) : null
                         }));
                 }
+
                 state.selectedFranchiseIds.clear();
+                const titleEl = document.getElementById('batch-grid-title');
+                if (titleEl) {
+                    titleEl.textContent = `Collection results for "${query}" (${state.franchiseItems.length} titles)`;
+                }
                 renderFranchiseGrid();
             } catch (err) {
                 console.error("Franchise search error:", err);
@@ -870,13 +1238,235 @@
             }
         }
 
+        // ============================================================================
+        // ACTOR & STAR FILMOGRAPHY SEARCH AND LOGIC
+        // ============================================================================
+        async function loadPresetActor(actorId, actorName) {
+            const container = document.getElementById('franchise-results-container');
+            if (container) {
+                container.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-4 w-4 text-violet-400" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    Loading filmography for ${actorName}...
+                </div>`;
+            }
+
+            try {
+                const [personData, creditsData] = await Promise.all([
+                    fetchTmdbApi(`/person/${actorId}`),
+                    fetchTmdbApi(`/person/${actorId}/combined_credits`)
+                ]);
+
+                if (!personData || !creditsData) {
+                    throw new Error("Failed to load TMDB person details");
+                }
+
+                processAndRenderActorFilmography(personData, creditsData);
+            } catch (err) {
+                console.error("Actor load error:", err);
+                if (container) {
+                    container.innerHTML = `<div class="text-center py-10 text-rose-400 text-xs">Failed to load filmography. Please check your connection.</div>`;
+                }
+            }
+        }
+
+        async function searchActorFilmography(query) {
+            if (!query || query.trim().length < 2) return;
+            const container = document.getElementById('franchise-results-container');
+            const matchesBox = document.getElementById('actor-matches-container');
+
+            if (container) {
+                container.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs flex items-center justify-center gap-2">
+                    <svg class="animate-spin h-4 w-4 text-violet-400" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
+                    </svg>
+                    Searching for stars matching "${query}"...
+                </div>`;
+            }
+
+            try {
+                const data = await fetchTmdbApi(`/search/person?query=${encodeURIComponent(query)}&include_adult=false`);
+                if (!data || !data.results || data.results.length === 0) {
+                    if (container) {
+                        container.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs">No actors or stars found matching "${query}". Try searching by first or last name.</div>`;
+                    }
+                    if (matchesBox) matchesBox.classList.add('hidden');
+                    return;
+                }
+
+                const validPeople = data.results.slice(0, 6);
+
+                // Show carousel chips if multiple people match
+                if (validPeople.length > 1 && matchesBox) {
+                    matchesBox.classList.remove('hidden');
+                    matchesBox.innerHTML = `
+                        <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1">
+                            <span class="text-[10px] text-gray-400 font-medium whitespace-nowrap">Matching stars:</span>
+                            ${validPeople.map(p => `
+                                <button type="button" onclick="loadPresetActor(${p.id}, '${(p.name || '').replace(/'/g, "\\'")}')" class="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium bg-surface-800 hover:bg-surface-700 text-gray-200 border border-white/10 active:scale-95 transition whitespace-nowrap flex-shrink-0">
+                                    <img src="${p.profile_path ? PROFILE_BASE_URL + p.profile_path : 'https://placehold.co/32x32/1c1e2d/c4b5fd?text=?'}" class="w-4 h-4 rounded-full object-cover">
+                                    <span>${p.name}</span>
+                                    <span class="text-[9px] text-gray-400">(${p.known_for_department || 'Acting'})</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    `;
+                } else if (matchesBox) {
+                    matchesBox.classList.add('hidden');
+                }
+
+                // Automatically load filmography for top matched person
+                const topPerson = validPeople[0];
+                await loadPresetActor(topPerson.id, topPerson.name);
+            } catch (err) {
+                console.error("Actor search error:", err);
+                if (container) {
+                    container.innerHTML = `<div class="text-center py-10 text-rose-400 text-xs">Error searching actor. Please check connection.</div>`;
+                }
+            }
+        }
+
+        function processAndRenderActorFilmography(personData, creditsData) {
+            state.currentActor = personData;
+            const isDirector = personData.known_for_department === 'Directing';
+            
+            let rawList = [];
+            if (isDirector) {
+                rawList = (creditsData.crew || []).filter(c => c.job === 'Director' && c.poster_path);
+                const actingList = (creditsData.cast || []).filter(c => c.poster_path && !/Self/i.test(c.character || ''));
+                rawList = [...rawList, ...actingList];
+            } else {
+                rawList = (creditsData.cast || []).filter(c => {
+                    if (!c.poster_path) return false;
+                    if (c.media_type === 'tv') {
+                        return c.character && !/^(Self|Guest|Host|Judge|Himself|Herself)/i.test(c.character.trim()) && !/Self/i.test(c.character) && !/Archive/i.test(c.character);
+                    }
+                    return !/Self/i.test(c.character || '') && !/Archive/i.test(c.character || '');
+                });
+                const directing = (creditsData.crew || []).filter(c => c.job === 'Director' && c.poster_path);
+                rawList = [...rawList, ...directing];
+            }
+
+            // Deduplicate by item.id
+            const seen = new Set();
+            const deduped = [];
+            for (const c of rawList) {
+                if (!seen.has(c.id)) {
+                    seen.add(c.id);
+                    deduped.push({
+                        id: c.id,
+                        title: c.title || c.name,
+                        type: c.media_type === 'tv' ? 'series' : 'movie',
+                        media_type: c.media_type || 'movie',
+                        year: (c.release_date || c.first_air_date || '').split('-')[0] || 'N/A',
+                        poster: c.poster_path ? `${PROFILE_BASE_URL}${c.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster',
+                        character: c.character || (c.job ? c.job : ''),
+                        rating: c.vote_average ? Number(c.vote_average).toFixed(1) : null,
+                        popularity: c.popularity || 0,
+                        vote_count: c.vote_count || 0
+                    });
+                }
+            }
+
+            state.rawActorCredits = deduped;
+            state.actorMediaTypeFilter = 'all';
+            state.actorSortFilter = 'popularity';
+
+            // Update Actor Profile Banner UI
+            const banner = document.getElementById('actor-profile-banner');
+            if (banner) {
+                banner.classList.remove('hidden');
+                const avatar = document.getElementById('actor-banner-avatar');
+                const name = document.getElementById('actor-banner-name');
+                const dept = document.getElementById('actor-banner-dept');
+                const meta = document.getElementById('actor-banner-meta');
+
+                if (avatar) avatar.src = personData.profile_path ? `${PROFILE_BASE_URL}${personData.profile_path}` : 'https://placehold.co/40x40/1c1e2d/c4b5fd?text=?';
+                if (name) name.textContent = personData.name;
+                if (dept) dept.textContent = personData.known_for_department || 'Acting';
+                if (meta) meta.textContent = `${deduped.length} titles in filmography`;
+            }
+
+            applyActorFiltersAndRender();
+        }
+
+        function applyActorFiltersAndRender() {
+            let list = [...(state.rawActorCredits || [])];
+
+            // Media type filter
+            if (state.actorMediaTypeFilter && state.actorMediaTypeFilter !== 'all') {
+                list = list.filter(item => item.media_type === state.actorMediaTypeFilter);
+            }
+
+            // Sort filter
+            if (state.actorSortFilter === 'year-desc') {
+                list.sort((a,b) => (b.year || '').localeCompare(a.year || ''));
+            } else if (state.actorSortFilter === 'year-asc') {
+                list.sort((a,b) => (a.year || '').localeCompare(b.year || ''));
+            } else if (state.actorSortFilter === 'rating') {
+                list.sort((a,b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
+            } else {
+                list.sort((a,b) => (b.popularity || 0) - (a.popularity || 0));
+            }
+
+            state.franchiseItems = list;
+            state.selectedFranchiseIds.clear();
+
+            const titleEl = document.getElementById('batch-grid-title');
+            if (titleEl && state.currentActor) {
+                titleEl.textContent = `${state.currentActor.name} Filmography (${list.length} titles)`;
+            }
+
+            renderFranchiseGrid();
+        }
+
+        function filterActorMediaType(type) {
+            state.actorMediaTypeFilter = type;
+            const allBtn = document.getElementById('actor-filter-all');
+            const movieBtn = document.getElementById('actor-filter-movie');
+            const tvBtn = document.getElementById('actor-filter-tv');
+
+            [allBtn, movieBtn, tvBtn].forEach(b => {
+                if (!b) return;
+                b.className = "px-2 py-0.5 rounded font-medium text-gray-400 hover:text-white";
+            });
+
+            const activeBtn = type === 'movie' ? movieBtn : (type === 'tv' ? tvBtn : allBtn);
+            if (activeBtn) activeBtn.className = "px-2 py-0.5 rounded font-medium bg-violet-600 text-white";
+
+            applyActorFiltersAndRender();
+        }
+
+        function sortActorFilmography(sortVal) {
+            state.actorSortFilter = sortVal;
+            applyActorFiltersAndRender();
+        }
+
+        function selectAllFranchiseItems() {
+            state.franchiseItems.forEach(item => {
+                const isAlreadyWatched = state.items.some(i => Number(i.tmdb_id) === Number(item.id));
+                if (!isAlreadyWatched) {
+                    state.selectedFranchiseIds.add(item.id);
+                }
+            });
+            renderFranchiseGrid();
+        }
+
+        function deselectAllFranchiseItems() {
+            state.selectedFranchiseIds.clear();
+            renderFranchiseGrid();
+        }
+
         function renderFranchiseGrid() {
             const container = document.getElementById('franchise-results-container');
             if (!container) return;
             container.innerHTML = '';
 
             if (state.franchiseItems.length === 0) {
-                container.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs">No movies found in this franchise.</div>`;
+                container.innerHTML = `<div class="text-center py-10 text-gray-400 text-xs">No titles found. Try searching another star or universe.</div>`;
                 updateFranchiseCount();
                 return;
             }
@@ -903,7 +1493,7 @@
 
                 card.innerHTML = `
                     <div class="relative aspect-[2/3] w-full rounded-lg overflow-hidden bg-surface-800 mb-2">
-                        <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover">
+                        <img src="${item.poster}" alt="${item.title}" class="w-full h-full object-cover transition duration-300 hover:scale-105" loading="lazy">
                         ${isAlreadyWatched ? `
                             <span class="absolute top-1.5 right-1.5 px-2 py-0.5 rounded bg-emerald-500 text-black font-bold text-[10px] shadow">
                                 ✓ Watched
@@ -915,11 +1505,19 @@
                                 </svg>
                             </div>
                         `}
+                        ${item.rating ? `
+                            <span class="absolute bottom-1.5 left-1.5 px-1.5 py-0.5 rounded bg-black/75 backdrop-blur-sm text-amber-400 font-bold text-[10px] flex items-center gap-0.5 shadow">
+                                ★ ${item.rating}
+                            </span>
+                        ` : ''}
                     </div>
                     <div>
-                        <h4 class="text-xs font-semibold text-white truncate">${item.title}</h4>
-                        <div class="flex items-center justify-between text-[10px] text-gray-400 mt-0.5">
-                            <span class="uppercase">${item.type}</span>
+                        <h4 class="text-xs font-semibold text-white truncate" title="${item.title}">${item.title}</h4>
+                        ${item.character ? `
+                            <p class="text-[10px] text-violet-300 truncate font-medium mt-0.5" title="${item.character}">${item.character.startsWith('as ') ? item.character : 'as ' + item.character}</p>
+                        ` : ''}
+                        <div class="flex items-center justify-between text-[10px] text-gray-400 mt-1">
+                            <span class="uppercase tracking-wider font-semibold text-[9px] px-1 py-0.2 rounded bg-surface-800">${item.type}</span>
                             <span>${item.year}</span>
                         </div>
                     </div>
@@ -953,43 +1551,46 @@
 
         async function batchAddSelectedFranchise() {
             if (state.selectedFranchiseIds.size === 0) {
-                showStatus("Please click to select at least one movie from the franchise.");
+                showStatus("Please click to select at least one title.");
                 return;
             }
 
             const toAdd = state.franchiseItems.filter(i => state.selectedFranchiseIds.has(i.id));
+            state.selectedFranchiseIds.clear();
+            updateFranchiseCount();
             closeFranchiseModal();
-            showStatus(`Batch adding ${toAdd.length} movies to your watchlist & Google Sheet...`);
+            showStatus(`Batch adding ${toAdd.length} titles to your watchlist & Google Sheet...`);
 
-            for (const item of toAdd) {
-                const rawEntry = { title: item.title, tmdb_id: item.id, type: item.type, rewatches: 1 };
-                
-                // Append each to Google Sheet
-                if (state.sheetUrl) {
-                    try {
-                        await fetch(state.sheetUrl, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(rawEntry)
-                        });
-                    } catch (err) {
-                        console.error("Batch post error:", err);
-                    }
-                }
-
-                const enriched = await fetchTmdbDetailsAndCast(rawEntry);
-                if (enriched) {
-                    state.items.unshift(enriched);
-                }
+            // Concurrently fire Google Sheet appends in background
+            if (state.sheetUrl) {
+                toAdd.forEach(item => {
+                    const rawEntry = { title: item.title, tmdb_id: item.id, type: item.type, rewatches: 1 };
+                    fetch(state.sheetUrl, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(rawEntry)
+                    }).catch(err => console.error("Batch post error:", err));
+                });
             }
 
-            if (!state.sheetUrl || window.location.protocol === 'file:') {
-                localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
+            // Fetch TMDB details in parallel chunks of 5
+            const BATCH_SIZE = 5;
+            const newEnrichedItems = [];
+            for (let i = 0; i < toAdd.length; i += BATCH_SIZE) {
+                const chunk = toAdd.slice(i, i + BATCH_SIZE);
+                showStatus(`Enriching titles (${Math.min(i + chunk.length, toAdd.length)}/${toAdd.length})...`);
+                const chunkResults = await Promise.all(chunk.map(item => {
+                    const rawEntry = { title: item.title, tmdb_id: item.id, type: item.type, rewatches: 1 };
+                    return fetchTmdbDetailsAndCast(rawEntry);
+                }));
+                chunkResults.filter(Boolean).forEach(en => newEnrichedItems.push(en));
             }
 
+            state.items = [...newEnrichedItems, ...state.items];
+            persistWatchlistCache();
             renderAll();
-            showStatus(`Successfully batch added ${toAdd.length} movies!`);
+            showStatus(`🎉 Successfully added ${toAdd.length} titles to your watchlist!`);
         }
 
         // Enhanced Selection with Live Confirmation Preview Card
@@ -1030,7 +1631,10 @@
         }
 
         async function loadFromGoogleSheet() {
-            showStatus("Syncing watchlist from Google Sheets & TMDB API...");
+            // Only show initial sync status if no items are currently loaded
+            if (!state.items || state.items.length === 0) {
+                showStatus("Syncing watchlist from Google Sheets & TMDB API...");
+            }
             try {
                 const res = await fetch(state.sheetUrl);
                 const json = await res.json();
@@ -1049,18 +1653,59 @@
                 });
 
                 const uniqueRows = Array.from(uniqueMap.values());
+
+                // Read cached enriched metadata to avoid redundant TMDB requests
+                let enrichedCache = {};
+                try {
+                    enrichedCache = JSON.parse(localStorage.getItem('cinetrack_enriched_items_v2') || '{}');
+                } catch (e) {}
+
+                let cacheUpdated = false;
+
                 const enriched = await Promise.all(uniqueRows.map(async (row) => {
-                    return await fetchTmdbDetailsAndCast(row);
+                    const cacheKey = row.tmdb_id ? `id_${row.tmdb_id}` : `title_${(row.title || '').toLowerCase()}`;
+                    const cached = enrichedCache[cacheKey];
+
+                    if (cached && cached.poster && !cached.poster.includes('placehold.co')) {
+                        return {
+                            ...cached,
+                            rewatches: Number(row.rewatches || 1),
+                            type: row.type || cached.type || 'movie'
+                        };
+                    }
+
+                    // Otherwise fetch fresh from TMDB
+                    const fresh = await fetchTmdbDetailsAndCast(row);
+                    if (fresh && fresh.poster && !fresh.poster.includes('placehold.co')) {
+                        enrichedCache[cacheKey] = fresh;
+                        cacheUpdated = true;
+                    }
+                    return fresh;
                 }));
 
                 state.items = enriched.filter(Boolean);
+
+                if (cacheUpdated) {
+                    try {
+                        localStorage.setItem('cinetrack_enriched_items_v2', JSON.stringify(enrichedCache));
+                    } catch (e) {
+                        console.warn("Storage quota limit reached for enriched cache:", e);
+                    }
+                }
+                persistWatchlistCache();
+
                 hideStatus();
                 renderAll();
             } catch (err) {
                 console.error("Sheet sync error:", err);
-                showStatus("Could not reach Google Sheet URL. Showing cached/demo entries instead.");
-                state.items = [...DEMO_WATCHLIST];
-                renderAll();
+                if (!state.items || state.items.length === 0) {
+                    showStatus("Could not reach Google Sheet URL. Showing demo entries instead.");
+                    state.items = [...DEMO_WATCHLIST];
+                    renderAll();
+                } else {
+                    showStatus("Offline mode: Using cached watchlist (Google Sheet currently unreachable).");
+                    setTimeout(hideStatus, 4000);
+                }
             }
         }
 
@@ -1089,6 +1734,7 @@
                 const origLang = data.original_language || '';
                 const origCountry = (data.origin_country && data.origin_country[0]) || (data.production_countries && data.production_countries[0] && data.production_countries[0].iso_3166_1) || '';
                 const industryInfo = detectIndustry(origLang, origCountry);
+                const voteAvg = data.vote_average ? Number(data.vote_average.toFixed(1)) : (item.rating || null);
 
                 return {
                     title: data.title || data.name || item.title,
@@ -1097,6 +1743,7 @@
                     industry: industryInfo.key,
                     industryLabel: industryInfo.label,
                     rewatches: Number(item.rewatches || 1),
+                    rating: voteAvg,
                     year: releaseDate ? releaseDate.split('-')[0] : 'N/A',
                     runtime: data.runtime || (endpoint === 'tv' ? 300 : 120),
                     poster: data.poster_path ? `${IMG_BASE_URL}${data.poster_path}` : "https://placehold.co/500x750/1c1e2d/c4b5fd?text=No+Poster",
@@ -1121,6 +1768,7 @@
                     industry: 'hollywood',
                     industryLabel: 'Hollywood',
                     rewatches: Number(item.rewatches || 1),
+                    rating: null,
                     year: 'N/A',
                     runtime: item.type === 'series' ? 240 : 120,
                     poster: 'https://placehold.co/500x750/1c1e2d/c4b5fd?text=' + encodeURIComponent(item.title || 'Movie'),
@@ -1150,53 +1798,114 @@
                 return matchesType && matchesIndustry && (!q || matchesTitle || matchesCast || matchesIndustryText);
             });
 
-            if (filtered.length === 0) {
+            // Dynamic in-app sorting
+            let sorted = [...filtered];
+            switch (state.activeSort) {
+                case 'title-asc':
+                    sorted.sort((a, b) => (a.title || '').localeCompare(b.title || ''));
+                    break;
+                case 'title-desc':
+                    sorted.sort((a, b) => (b.title || '').localeCompare(a.title || ''));
+                    break;
+                case 'year-desc':
+                    sorted.sort((a, b) => (parseInt(b.year) || 0) - (parseInt(a.year) || 0));
+                    break;
+                case 'year-asc':
+                    sorted.sort((a, b) => (parseInt(a.year) || 0) - (parseInt(b.year) || 0));
+                    break;
+                case 'rewatches-desc':
+                    sorted.sort((a, b) => (Number(b.rewatches) || 1) - (Number(a.rewatches) || 1));
+                    break;
+                case 'rating-desc':
+                    sorted.sort((a, b) => (Number(b.rating) || 0) - (Number(a.rating) || 0));
+                    break;
+                default:
+                    // 'default' keeps original order
+                    break;
+            }
+
+            if (sorted.length === 0) {
                 emptyState.classList.remove('hidden');
                 return;
             }
             emptyState.classList.add('hidden');
 
-            filtered.forEach((item) => {
+            sorted.forEach((item) => {
                 const originalIndex = state.items.indexOf(item);
                 const card = document.createElement('div');
-                card.className = "poster-card group cursor-pointer rounded-2xl bg-surface-800 overflow-hidden border border-white/5 flex flex-col";
+                card.className = "poster-card group cursor-pointer rounded-2xl bg-surface-800 overflow-hidden border border-white/5 flex flex-col active:scale-[0.98]";
                 card.onclick = () => openDetailsModal(originalIndex);
+
+                const indBadge = item.industry === 'south' 
+                    ? '🌴 South' 
+                    : item.industry === 'bollywood' 
+                        ? '🇮🇳 Bolly' 
+                        : item.industry === 'anime' 
+                            ? '🇯🇵 Anime' 
+                            : item.industry === 'kdrama' 
+                                ? '🇰🇷 K-Drama' 
+                                : 'Hollywood';
+
+                const ratingBadge = item.rating 
+                    ? `<span class="px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-black/80 text-amber-300 border border-amber-500/30 backdrop-blur-md flex items-center gap-0.5">
+                           <span class="text-amber-400">★</span>${item.rating}
+                       </span>`
+                    : '';
 
                 card.innerHTML = `
                     <div class="relative aspect-[2/3] w-full bg-surface-900 overflow-hidden">
                         <img src="${item.poster}" alt="${item.title}" loading="lazy" class="w-full h-full object-cover group-hover:scale-105 transition duration-500">
-                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-3">
-                            <span class="text-[11px] font-medium text-violet-300 flex items-center gap-1">
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-2.5 sm:p-3">
+                            <span class="text-[10px] sm:text-[11px] font-medium text-violet-300 flex items-center gap-1">
                                 View Cast & Credits &rarr;
                             </span>
                         </div>
-                        <div class="absolute top-2.5 left-2.5">
-                            <span class="px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/75 text-amber-300 border border-amber-500/30 backdrop-blur-md">
-                                ${item.industry === 'south' ? '🌴 South Indian' : item.industry === 'bollywood' ? '🇮🇳 Bollywood' : item.industry === 'anime' ? '🇯🇵 Anime' : item.industry === 'kdrama' ? '🇰🇷 K-Drama' : 'Hollywood'}
+                        <div class="absolute top-2 left-2 flex items-center gap-1 flex-wrap max-w-[85%]">
+                            <span class="px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-black/80 text-gray-200 border border-white/10 backdrop-blur-md">
+                                ${indBadge}
                             </span>
+                            ${ratingBadge}
                         </div>
                         ${item.rewatches > 1 ? `
-                            <span class="absolute top-2.5 right-2.5 px-2 py-0.5 rounded-md text-[10px] font-bold bg-black/75 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+                            <span class="absolute top-2 right-2 px-1.5 py-0.5 rounded-md text-[9px] sm:text-[10px] font-bold bg-black/80 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
                                 ${item.rewatches}x
                             </span>
                         ` : ''}
                     </div>
-                    <div class="p-3.5 text-center">
-                        <h3 class="font-medium text-sm text-gray-100 truncate group-hover:text-violet-400 transition">${item.title}</h3>
+                    <div class="p-2.5 sm:p-3.5 text-center">
+                        <h3 class="font-medium text-xs sm:text-sm text-gray-100 truncate group-hover:text-violet-400 transition">${item.title}</h3>
                     </div>
                 `;
                 grid.appendChild(card);
             });
         }
 
+        function setSort(val) {
+            state.activeSort = val || 'default';
+            renderAll();
+        }
+
         function updateStats() {
             const total = state.items.length;
             const totalMinutes = state.items.reduce((acc, item) => acc + ((item.runtime || 120) * (item.rewatches || 1)), 0);
             const totalRewatches = state.items.reduce((acc, item) => acc + (item.rewatches || 1), 0);
+            const hrsText = `${Math.round(totalMinutes / 60)} hrs`;
 
-            document.getElementById('stat-total').textContent = total;
-            document.getElementById('stat-hours').textContent = `${Math.round(totalMinutes / 60)} hrs`;
-            document.getElementById('stat-rewatches').textContent = totalRewatches;
+            // Desktop Stats
+            const elTotal = document.getElementById('stat-total');
+            const elHours = document.getElementById('stat-hours');
+            const elRewatches = document.getElementById('stat-rewatches');
+            if (elTotal) elTotal.textContent = total;
+            if (elHours) elHours.textContent = hrsText;
+            if (elRewatches) elRewatches.textContent = totalRewatches;
+
+            // Mobile Quick Ribbon Stats
+            const elTotalM = document.getElementById('stat-total-mobile');
+            const elHoursM = document.getElementById('stat-hours-mobile');
+            const elRewatchesM = document.getElementById('stat-rewatches-mobile');
+            if (elTotalM) elTotalM.textContent = total;
+            if (elHoursM) elHoursM.textContent = hrsText;
+            if (elRewatchesM) elRewatchesM.textContent = totalRewatches;
         }
 
         // ============================================================================
@@ -1208,9 +1917,9 @@
                 const btn = document.getElementById(`tab-${t}`);
                 if (btn) {
                     if (t === type) {
-                        btn.className = "filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white";
+                        btn.className = "filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition bg-accent text-white active:scale-95";
                     } else {
-                        btn.className = "filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white";
+                        btn.className = "filter-tab px-3 sm:px-4 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition text-gray-400 hover:text-white active:scale-95";
                     }
                 }
             });
@@ -1223,55 +1932,47 @@
                 const btn = document.getElementById(`ind-${ind}`);
                 if (!btn) return;
                 if (ind === industry) {
-                    btn.className = "ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition bg-violet-600/30 text-violet-200 border border-violet-500/30 whitespace-nowrap";
+                    btn.className = "ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition bg-violet-600/30 text-violet-200 border border-violet-500/30 whitespace-nowrap flex-shrink-0 active:scale-95";
                 } else {
-                    btn.className = "ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap";
+                    btn.className = "ind-tab px-3 py-1.5 rounded-lg text-xs font-medium transition text-gray-400 hover:text-white whitespace-nowrap flex-shrink-0 active:scale-95";
                 }
             });
             renderAll();
         }
-        async function batchAddSelectedFranchise() {
-            if (state.selectedFranchiseIds.size === 0) {
-                showStatus("Please click to select at least one movie from the franchise.");
-                return;
+
+        // Navigation helpers for mobile
+        function scrollToTopAndReset() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function focusSearch() {
+            const input = document.getElementById('search-input');
+            if (input) {
+                input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(() => input.focus(), 250);
             }
+        }
 
-            const toAdd = state.franchiseItems.filter(i => state.selectedFranchiseIds.has(i.id));
-            // Clear selections immediately so subsequent searches start fresh
-            state.selectedFranchiseIds.clear();
-            updateFranchiseCount();
-            closeFranchiseModal();
-            showStatus(`Batch adding ${toAdd.length} movies to your watchlist & Google Sheet...`);
-
-            for (const item of toAdd) {
-                const rawEntry = { title: item.title, tmdb_id: item.id, type: item.type, rewatches: 1 };
-                
-                // Append each to Google Sheet
-                if (state.sheetUrl) {
-                    try {
-                        await fetch(state.sheetUrl, {
-                            method: 'POST',
-                            mode: 'no-cors',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify(rawEntry)
-                        });
-                    } catch (err) {
-                        console.error("Batch post error:", err);
-                    }
-                }
-
-                const enriched = await fetchTmdbDetailsAndCast(rawEntry);
-                if (enriched) {
-                    state.items.unshift(enriched);
+        function handleSearch(val) {
+            state.searchQuery = val || '';
+            const clearBtn = document.getElementById('search-clear-btn');
+            if (clearBtn) {
+                if (state.searchQuery.trim().length > 0) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
                 }
             }
-
-            if (!state.sheetUrl || window.location.protocol === 'file:') {
-                localStorage.setItem('cinetrack_demo_items', JSON.stringify(state.items));
-            }
-
             renderAll();
-            showStatus(`Successfully batch added ${toAdd.length} movies!`);
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('search-input');
+            if (input) {
+                input.value = '';
+                handleSearch('');
+                input.focus();
+            }
         }
 
         function filterByActor(actorName) {
@@ -1290,6 +1991,7 @@
                 modal.classList.add('hidden');
                 modal.classList.remove('flex');
             }
+            lockBodyScroll(false);
         }
 
         async function quickAddSimilar(sim) {
@@ -1297,6 +1999,7 @@
             const existing = state.items.find(i => Number(i.tmdb_id) === Number(sim.id));
             if (existing) {
                 existing.rewatches = (existing.rewatches || 1) + 1;
+                persistWatchlistCache();
                 renderAll();
                 showStatus(`"${sim.title}" is already in your watchlist! Increased rewatch count to ${existing.rewatches}.`);
                 return;
@@ -1307,6 +2010,7 @@
             const enriched = await fetchTmdbDetailsAndCast(newRaw);
             if (enriched) {
                 state.items.unshift(enriched);
+                persistWatchlistCache();
                 renderAll();
                 showStatus(`Added "${enriched.title}" successfully!`);
             }
@@ -1320,6 +2024,7 @@
 
             state.items.splice(state.selectedIndex, 1);
             state.selectedIndex = null;
+            persistWatchlistCache();
             closeDetailsModal();
 
             if (state.sheetUrl) {
@@ -1343,6 +2048,7 @@
             if (state.selectedIndex === null) return;
             const item = state.items[state.selectedIndex];
             item.rewatches = Math.max(1, (item.rewatches || 1) + delta);
+            persistWatchlistCache();
             const el = document.getElementById('modal-rewatch');
             if (el) el.textContent = item.rewatches;
             renderAll();
@@ -1385,6 +2091,7 @@
                             title: r.title || r.name,
                             type: r.media_type === 'tv' ? 'series' : 'movie',
                             year: dateStr ? dateStr.split('-')[0] : 'N/A',
+                            rating: r.vote_average ? Number(r.vote_average.toFixed(1)) : null,
                             overview: r.overview || '',
                             poster: r.poster_path ? `${PROFILE_BASE_URL}${r.poster_path}` : 'https://placehold.co/92x138/1c1e2d/c4b5fd?text=No+Poster'
                         };
@@ -1422,6 +2129,7 @@
                         <div class="text-[11px] text-gray-400 flex items-center gap-2 mt-0.5">
                             <span class="uppercase font-bold text-[10px] px-1.5 py-0.2 rounded bg-white/5 text-violet-300">${item.type}</span>
                             <span>${item.year}</span>
+                            ${item.rating ? `<span class="text-amber-400 font-semibold">★ ${item.rating}</span>` : ''}
                             <span class="font-mono text-gray-500">#${item.id}</span>
                         </div>
                     </div>
@@ -1448,6 +2156,7 @@
             if (existing) {
                 closeAddModal();
                 existing.rewatches = (existing.rewatches || 1) + 1;
+                persistWatchlistCache();
                 renderAll();
                 showStatus(`"${title}" was already in your list! Incremented rewatch count to ${existing.rewatches}.`);
                 e.target.reset();
@@ -1475,6 +2184,7 @@
             const enriched = await fetchTmdbDetailsAndCast(newEntryRaw);
             if (enriched) {
                 state.items.unshift(enriched);
+                persistWatchlistCache();
                 renderAll();
                 showStatus(`Added "${enriched.title}"!`);
             }

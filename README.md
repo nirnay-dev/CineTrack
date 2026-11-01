@@ -8,6 +8,11 @@ Live Demo: [https://nirnay-dev.github.io/CineTrack/](https://nirnay-dev.github.i
 
 ## ✨ Features
 
+- **Mobile Screen Friendly & Touch Ergonomic**:
+  - Native-style **Bottom Navigation Bar** with thumb-zone Floating Action Button (FAB).
+  - Responsive **Mobile Bottom Sheets** replacing centered dialogs on small screens with drag indicators.
+  - **Mobile Quick Stats Ribbon** to check watched count, total hours, and rewatches on any phone screen.
+  - iOS Safari auto-zoom prevention and tactile active touch states.
 - **Minimalist Aesthetic Grid**: Card fronts display clean poster art, region badges, and rewatch indicators.
 - **IMDb & Netflix Style Cast Carousel**: Clicking any title opens a detailed modal with top-billed circular cast photos, character roles, runtime, and storylines.
 - **Click-to-Filter by Actor**: Click any actor's portrait to view all movies or shows in your watchlist featuring that performer.
@@ -23,11 +28,15 @@ Live Demo: [https://nirnay-dev.github.io/CineTrack/](https://nirnay-dev.github.i
   - Release Year (Newest & Oldest)
   - Most Rewatched
 - **Live Search & Confirmation Preview**: Type any movie or TV series name with instant poster previews, rating score (★), and synopsis confirmation before adding.
-- **Franchise & Universe Batch Explorer**:
-  - One-click presets for **Marvel (MCU)**, **Batman / DC**, **Star Wars**, **Harry Potter**, **Lord of the Rings**, and **Fast & Furious**.
-  - Search any collection or director (e.g. *Spider-Man*, *Christopher Nolan*, *Pixar*).
-  - Automatically identifies titles already in your sheet with a green **✓ Watched** badge.
-  - Multi-select unwatched movies and batch add them directly to your sheet in one click.
+- **Franchise & Star Filmography Batch Explorer**:
+  - **🏛️ Universe Presets**: 1-click collections for **Marvel (MCU)**, **Batman / DC**, **Star Wars**, **Harry Potter**, **Lord of the Rings**, and **Fast & Furious**.
+  - **🎭 Search by Actor / Star**: Search any actor or director (e.g. *Leonardo DiCaprio*, *Cillian Murphy*, *Christian Bale*, *Shah Rukh Khan*, *Christopher Nolan*, *Margot Robbie*).
+  - **✨ Actor Presets & Matching Stars**: Instant quick pills for top stars, with multiple match chips (e.g. *Chris Evans* vs *Chris Pratt* vs *Chris Hemsworth*).
+  - **Role & Character Display**: Shows the actor's character name (*"as Dom Cobb"*, *"as Thomas Shelby"*) or directorial credit.
+  - **Filmography Filters & Sorting**: Filter by *All*, *Movies*, or *TV Series*; sort by *Popularity*, *Newest*, *Oldest*, or *Rating*.
+  - **Select All & Deselect All**: 1-tap bulk selection to quickly add 10, 20, or 30 titles at once.
+  - **✓ Watched Protection**: Automatically marks titles already in your watchlist with a green badge to avoid duplicate additions.
+  - **Parallel Batch Sync**: Concurrently syncs selected titles to Google Sheets in the background while rapidly enriching metadata in chunks.
 - **Dual TMDB Mirror Resolution**: Automatically switches between `api.tmdb.org` and `api.themoviedb.org` to bypass regional ISP/DNS restrictions.
 - **Rewatch Counter & Time Tracker**: Keep track of rewatches and automatically calculate your total hours watched.
 - **Deduplication Engine**: Prevents adding duplicates by incrementing rewatch counts instead.
